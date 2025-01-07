@@ -3,6 +3,7 @@ import bcrypt
 from datetime import datetime 
 
 status_bar = ['Applied', 'Rejected', 'Interview', 'Offer']
+
 # create the tables for the database
 def create_tables():
     connection  = sqlite3.connect("job_tracker.db")
@@ -51,6 +52,33 @@ def register_users(username, email, password):
                         VALUES (?,?,?)''',(username, email, hashed_password))
         except sqlite3.IntegrityError as e:
             raise ValueError("Database constraint error: " + str(e))
+
+
+# need to verify if the user is persent in the database or not.
+def login(username, password):
+    with sqlite3.connect('job_tracker.db') as connection:
+        cursor = connection.cursor()   
+        # if the user is present, then need to use that user's id to do all the job addition in the database.
+        try:
+            cursor.execute('''
+            SELECT password, id FROM USERS 
+            WHERE username = ?
+            ''', (username,))
+            login_password = cursor.fetchone()
+            stored_password = login_password[0]
+
+            # if the user isn't present, prompt them by saying they aren't authorized.
+            if not login_password:
+                raise ValueError("Username not found.")
+
+            if not isinstance(stored_password, bytes):
+                stored_password = stored_password.encode('utf-8')
+
+            if login_password and bcrypt.checkpw(password.encode('utf-8'), stored_password):
+                return login_password[1]
+
+        except ValueError:
+            raise "Invalid Username or Password"
 
 #check if the user_id exists
 def user_exists(user_id):
@@ -138,33 +166,6 @@ def update_status(user_id, id, new_status):
 # password = input("Enter your password:")
 
 
-# need to verify if the user is persent in the database or not.
-def login(username, password):
-    with sqlite3.connect('job_tracker.db') as connection:
-        cursor = connection.cursor()   
-        # if the user is present, then need to use that user's id to do all the job addition in the database.
-        try:
-            cursor.execute('''
-            SELECT password, id FROM USERS 
-            WHERE username = ?
-            ''', (username,))
-            login_password = cursor.fetchone()
-            stored_password = login_password[0]
-
-            # if the user isn't present, prompt them by saying they aren't authorized.
-            if not login_password:
-                raise ValueError("Username not found.")
-
-            if not isinstance(stored_password, bytes):
-                stored_password = stored_password.encode('utf-8')
-
-            if login_password and bcrypt.checkpw(password.encode('utf-8'), stored_password):
-                return login_password[1]
-
-        except ValueError:
-            raise "Invalid Username or Password"
-
-
 #delete users account
 def delete_users(username, id):
     with sqlite3.connect('job_tracker.db') as connection:
@@ -180,3 +181,7 @@ def delete_users(username, id):
 #         print(user)
 
 
+#Next things that need to be implemented
+# Search and filter functionality for jobs
+# Begin frontend integration
+# implement user authentication for secure session managament  
