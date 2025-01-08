@@ -159,29 +159,36 @@ def update_status(user_id, id, new_status):
         return "Use valid status"
 
 
-
-# need to prompt the user to type in their username and password
-
-# username = input("Enter your username:")
-# password = input("Enter your password:")
-
-
 #delete users account
 def delete_users(username, id):
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
         cursor.execute('DELETE FROM users WHERE username = ? and id = ? ', (username, id))
 
-
-# with sqlite3.connect('job_tracker.db') as connection:
-#     cursor = connection.cursor()
-#     cursor.execute('SELECT * FROM users ')
-#     users = cursor.fetchall()
-#     for user in users:
-#         print(user)
-
-
 #Next things that need to be implemented
 # Search and filter functionality for jobs
+def search(word):
+    with sqlite3.connect('job_tracker.db') as connection:
+        cursor = connection.cursor()
+        try:
+            cursor.execute('''
+                           SELECT * FROM job_applications
+                           WHERE title COLLATE NOCASE LIKE ? 
+                           or company_name COLLATE NOCASE LIKE ? 
+                           or status COLLATE NOCASE LIKE ?
+                           ''', (f'%{word}%', f'%{word}%', f'%{word}%',) )
+            search_result = cursor.fetchall()
+            for result in search_result:
+                print(result)
+        except sqlite3.IntegrityError as e:
+            raise ("Error:",str(e))
+
+#filter functionality
+def filter(word):
+    with sqlite3.connect('job_tracker.db') as connection:
+        cursor = connection.cursor()
+        
+
+
 # Begin frontend integration
 # implement user authentication for secure session managament  
