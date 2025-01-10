@@ -183,12 +183,61 @@ def search(word):
         except sqlite3.IntegrityError as e:
             raise ("Error:",str(e))
 
+
+
 #filter functionality
-def filter(word):
-    with sqlite3.connect('job_tracker.db') as connection:
-        cursor = connection.cursor()
-        
+def filter(user_column, user_filter):
+    column_map = {
+    'status': 'status',
+    'date': 'date'
+    }
+
+    user_input = {
+    'status': None,
+    'date': None
+    }
+
+    if user_column not in column_map:
+        print("Invalid column name")
+
+    if user_column.lower() == 'status':
+        filters = [status.strip().capitalize() for status in user_filter.split(',')]
+        invalid_filters = [status for status in filters if status not in status_bar ]
+        if invalid_filters:
+            print('Invalid filters')
+    else:
+        filters = [user_filter]
+
+    column_name = column_map[user_column]
+    if len(filters) > 1:
+        placeholder = ', '.join(['?'] * len(filters))
+        query = f'''
+        SELECT * FROM job_applications
+        WHERE {column_name} COLLATE NOCASE IN ({placeholder})
+        '''
+    else:
+        query = f'''
+        SELECT * FROM job_applications
+        WHERE {column_name} COLLATE NOCASE = ?
+        '''
+    try:
+        with sqlite3.connect('job_tracker.db') as connection:
+            cursor = connection.cursor()
+            cursor.execute(query, filters)
+            filter_result = cursor.fetchall()
+            for result in filter_result:
+                print(result)
+    except sqlite3.InterfaceError as e:
+        raise ("Error, ", str(e))
 
 
-# Begin frontend integration
 # implement user authentication for secure session managament  
+
+
+
+user_column = input("Enter the column that you want to filter form: ")
+user_filter= input("Enter the parameter that you want to filter form: ").strip()
+
+
+
+filter(user_column, user_filter)
