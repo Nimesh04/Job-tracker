@@ -232,12 +232,46 @@ def filter(user_column, user_filter):
 
 
 # implement user authentication for secure session managament  
+with sqlite3.connect('job_tracker.db') as connection:
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM users')
+        results = cursor.fetchall()
+        for result in results:
+            print(result)
+
+
+user_name = input("Enter your username:")
+user_password = input("Enter your password: ")
+
+user_id = login(user_name, user_password)
+
+while user_id:
+    with sqlite3.connect('job_tracker.db') as connection:
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM job_applications WHERE user_id = ? ', (user_id,))
+        results = cursor.fetchall()
+        for result in results:
+            print(result)
+    title = input("Enter the title:")
+    company_name = input("Enter the compay name:")
+    date_applied = input("Enter the date you applied to this:")
+    status = input("Enter the status:")
+    notes = input("Enter your notes: ")
+    add_job(user_id, title, company_name, date_applied, status, notes )
+
+    with sqlite3.connect('job_tracker.db') as connection:
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM job_applications WHERE user_id = ? ', (user_id,))
+        results = cursor.fetchall()
+        for result in results:
+            print(result)
+
+    user_column = input("Enter the column that you want to filter form: ")
+    user_filter= input("Enter the parameter that you want to filter form: ").strip()
 
 
 
-user_column = input("Enter the column that you want to filter form: ")
-user_filter= input("Enter the parameter that you want to filter form: ").strip()
+    filter(user_column, user_filter)
+    exit()
 
 
-
-filter(user_column, user_filter)
