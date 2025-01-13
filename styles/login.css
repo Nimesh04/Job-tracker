@@ -1,0 +1,7 @@
+body{
+    font-family: Arial, sans-serif;
+    background-color:rgb(175, 85, 226);
+    color: #9ed2f5;
+    display: flex;
+    align-content: center;
+}
