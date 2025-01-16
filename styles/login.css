@@ -1,7 +1,30 @@
 body{
-    font-family: Arial, sans-serif;
-    background-color:rgb(175, 85, 226);
-    color: #9ed2f5;
+    min-height: 100vh;
+    font-family: "Poppins", sans-serif;
+    background: repeating-radial-gradient(#f3f4f6 , #3f67a1 );
+    color: #333333 ;
     display: flex;
-    align-content: center;
+    flex-direction: column;
+}
+
+.login_body{
+    text-align: center;
+    margin: 100px;
+    border: 3px solid black;
+    border-radius: 3px;
+}
+.login_body .login_user{
+    padding: 5px;
+
+}
+
+.login_body .login_pass{
+    padding: 5px;
+}
+
+.login_body .login_submit{
+    padding: 5px;
+    margin-left: 80vh;
+    display: flex;
+    flex-direction:row ;
 }
