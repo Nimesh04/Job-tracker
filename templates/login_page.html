@@ -3,30 +3,30 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap" rel="stylesheet">
         <title>Job Tracker - Login</title>
         <link rel="stylesheet" href="../styles/login.css">
     </head>
     
     <body>
-        <div class="login_body">
-            <h1>Welcome to your Job tracker</h1>
-            <div class="Login_center">
-                <form>
-                    <div class="login_user" >
-                        <label class="login_username">Username: </label>
-                        <input class="login_username_field" type="text">
-                    </div>
-                    <div class="login_pass">
-                        <label class="login_password">Password:</label>
-                        <input class="login_password_field" type="password">
-                    </div>
-                    <div class="login_submit">
-                        <input  type="submit" value="Login">
-                        <button type="submit" value="Sign Up"></button>
-                    </div>    
-                </form>
-            </div>
+        <div class="container">
+            <div class="login_body">
+                <h1 class="title">Job tracker</h1>
+                    <form>
+                            <label for="username">Username</label>
+                            <input type="text" id="username" placeholder="Enter your username" >
+    
+                            <label for="password">Password</label>
+                            <input type="password" id="password" placeholder="Enter your password" >
+    
+                            <div class="btn-container">
+                                <button type="submit" class="signup-btn">SIGN UP</button>
+                                <button type="submit" class="login-btn">LOGIN</button>
+                            </div>
+                    </form>
+            </div>  
         </div>
-        
     </body>
 </html>

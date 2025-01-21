@@ -1,30 +1,107 @@
 body{
-    min-height: 100vh;
+    margin: 0;
+    padding: 0;
     font-family: "Poppins", sans-serif;
-    background: repeating-radial-gradient(#f3f4f6 , #3f67a1 );
+    background: url('../Images/Strip\ lines\ background.png'), 
+    linear-gradient(340deg, #4A6FA5 , #8A8D9D, #C2A1E8, #D4A5C9 );
+    background-size: cover, cover;
     color: #333333 ;
+    height: 100vh;
     display: flex;
+    align-items: center;
+    justify-content: center;
     flex-direction: column;
+}
+
+.container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width:1440px;
 }
 
 .login_body{
     text-align: center;
-    margin: 100px;
-    border: 3px solid black;
-    border-radius: 3px;
+    margin: 40px;
+    padding:0 20px;
+    width: 100%;
+    max-width: 400px;
+    background-color: #A89AE5;
+    border: 1px solid black;
+    border-radius: 1px;
+    box-shadow: 10px 14px 14px;
+    border-radius: 50px;
 }
-.login_body .login_user{
-    padding: 5px;
+
+
+.title{
+    font-family: "Julius Sans One", serif;
+    font-weight: 400;
+    font-style: normal;
+    margin: 24px;
+    font-size: 24px;
+}
+
+form label{
+    font-family: "Julius Sans One", serif;
+    font-weight: 400;
+    font-style: normal;
+    display: block;
+    margin-left: 20px;
+    margin-bottom: 5px;
+    text-align: left;
 
 }
 
-.login_body .login_pass{
-    padding: 5px;
+form input{
+    font-family: "Julius Sans One", serif;
+    font-weight: 400;
+    font-style: normal;
+    width: 100%;
+    max-width: 350px;
+    margin-bottom: 10px;
+    box-shadow: 10px 5px 6px rgb(0,0,0,0.5);
+    border: 2px;
+    border-radius: 24px;
+    padding: 8px;
 }
 
-.login_body .login_submit{
-    padding: 5px;
-    margin-left: 80vh;
+.btn-container{
+    margin: 15px;
     display: flex;
-    flex-direction:row ;
+    flex-direction: space-between;
+    justify-content: center;
+}
+
+.signup-btn{
+    font-family: "Julius Sans One", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 18px;
+    border-radius: 24px;
+    margin-right: 20px;
+    padding: 0 20px;
+    background-color:#5990d8;
+    border: 2px;
+    cursor: pointer;
+}
+
+.signup-btn:hover{
+    background-color: #C2A1E8;
+}
+.login-btn{
+    font-family: "Julius Sans One", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 18px;
+    padding: 0 20px;
+    background: none;
+    border: none;
+    border-radius: 24px;
+    cursor:pointer;
+}
+
+.login-btn:hover{
+    background-color: #C2A1E8;
 }
