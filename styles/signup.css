@@ -1,0 +1,70 @@
+body{
+    font-family: "Julius Sans One", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 24px;
+    background: linear-gradient(120deg, #8C52FF, #5CE1E6);
+    height: 100vh;  
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+}
+
+
+.main-title{
+    margin: 50px;
+    padding: 20px; 
+    color: white;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    max-height: 1024px;
+}
+
+.signup-title{
+    display:flex;
+    justify-content: center;
+    margin-bottom: 24px;
+
+}
+
+.sign-up-form{
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    margin-left: 50px;
+    padding: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+form{
+    display: flex;
+    flex-direction: column;
+}
+
+form label{
+    margin:5px 0;
+}
+
+form input{
+    padding:1px;
+    margin: 5px 0;
+    height: 100%;
+    max-height: 73px;
+}
+
+.signup-btn-container{
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.signup-btn{
+    border-radius: 24px;
+    background-color: #3B81D1;
+    color: white;
+    box-shadow: 2px 7px 10px;
+}

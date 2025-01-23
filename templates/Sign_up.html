@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<heml lang="en">
+<html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,20 +8,39 @@
         <link href="https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap" rel="stylesheet">
         <title>Job Tracker</title>
         <link rel="stylesheet" href="/styles/global.css">
+        <link rel="stylesheet" href="/styles/signup.css">
     </head>
 
     <body>
-        <h1> Sign up to your track your jobs </h1>
         <div>
-            <form>
-                <label>Enter username:</label>
-                <input type="text">
-                <label>Enter email address:</label>
-                <input type="email">
-                <label>Enter your password:</label>
-                <input type="password">
-                <input type="submit" value="Sign up">
-            </form>
+            <h1 class="main-title"> WELCOME <br> TO <br> JOB TRACKER </h1>
         </div>
+        
+        
+        
+        <div class="sign-up-form">
+            <h2 class="signup-title"> SIGN UP </h2>
+                <form>
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" class="username">
+
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email">
+
+                    <label>Password</label>
+                    <input type="password" class="signup-password">
+
+                    <label>Confirm Password</label>
+                    <input type="password" class="signup-password">
+
+
+                    <div class="signup-btn-container">
+                        <button type="submit" class="signup-btn"> SIGN UP</button>
+                        <button type="submit" class="login-btn"> LOGIN</button>
+                    </div>
+                    
+                </form>
+        </div>
+
     </body>
-</heml>
+</html>
