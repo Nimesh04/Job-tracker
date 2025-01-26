@@ -3,7 +3,7 @@ body{
     padding: 0;
     font-family: "Poppins", sans-serif;
     background: url('../Images/Strip\ lines\ background.png'), 
-    linear-gradient(340deg, #4A6FA5 , #8A8D9D, #C2A1E8, #D4A5C9 );
+    linear-gradient(120deg, #8C52FF, #5CE1E6);
     background-size: cover, cover;
     color: #333333 ;
     height: 100vh;
@@ -21,26 +21,35 @@ body{
     max-width:1440px;
 }
 
+
 .login_body{
     text-align: center;
     margin: 40px;
     padding:0 20px;
     width: 100%;
     max-width: 400px;
-    background-color: #A89AE5;
+    background-color:white;
     border: 1px solid black;
     border-radius: 1px;
     box-shadow: 10px 14px 14px;
     border-radius: 50px;
 }
+head{
+    display: flex;
+    flex-direction: space-between;
+}
 
+.logo-bg{
+    width: 100px;
+
+}
 
 .title{
     font-family: "Julius Sans One", serif;
     font-weight: 400;
     font-style: normal;
-    margin: 24px;
-    font-size: 24px;
+    margin: 0 24px 24px;
+    font-size: 32px;
 }
 
 form label{
@@ -54,7 +63,7 @@ form label{
 
 }
 
-form input{
+.input-field{
     font-family: "Julius Sans One", serif;
     font-weight: 400;
     font-style: normal;
@@ -62,9 +71,15 @@ form input{
     max-width: 350px;
     margin-bottom: 10px;
     box-shadow: 10px 5px 6px rgb(0,0,0,0.5);
-    border: 2px;
+    border: 1px solid #ccc;
     border-radius: 24px;
     padding: 8px;
+    transition: border 0.3s ease-in-out;
+}
+
+.input-field:focus {
+    border-color: #8C52FF;
+    box-shadow: 0 0 5px rgba(140, 82, 255, 0.75);
 }
 
 .btn-container{
@@ -77,24 +92,30 @@ form input{
 .signup-btn{
     font-family: "Julius Sans One", serif;
     font-weight: 400;
-    font-style: normal;
+    font-size: 52px;
+    width: 100%;
+    height:50px;
+    padding: 15px 0;
     font-size: 18px;
     border-radius: 24px;
     margin-right: 20px;
     padding: 0 20px;
-    background-color:#5990d8;
+    background: linear-gradient(to right, #3B81D1, #5CE1E6);
     border: 2px;
     cursor: pointer;
+    transition: all 0.3s ease-in-out;
 }
 
 .signup-btn:hover{
-    background-color: #C2A1E8;
+    background: linear-gradient(to right, #2a5fa5, #47b5c6);
+    box-shadow: 5px 8px 15px rgba(0, 0, 0, 0.5);
 }
 .login-btn{
     font-family: "Julius Sans One", serif;
     font-weight: 400;
     font-style: normal;
     font-size: 18px;
+    width: 100%;
     padding: 0 20px;
     background: none;
     border: none;
@@ -103,5 +124,5 @@ form input{
 }
 
 .login-btn:hover{
-    background-color: #C2A1E8;
+    background: linear-gradient(to right, #ffffff, #c829d6);
 }
