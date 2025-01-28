@@ -59,7 +59,20 @@ def login_page():
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+
+    user_id = session["user_id"]
+
+    if not user_id:
+        flash("Please log in to access the dashboard.", "error")
+        return redirect(url_for("login_page"))
+
+    with sqlite3.connect("job_tracker.db") as connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM job_applications WHERE user_id = ?", (user_id,))
+        results = cursor.fetchall()
+
+
+    return render_template("dashboard.html", results=results)
 
 @app.route("/register_users", methods=["POST"])
 def register_users():
@@ -73,7 +86,7 @@ def register_users():
         return redirect(url_for("sign_up"))
     
     if password != confirm_password:
-        flash("Password is different")
+        flash("Password is different", "error")
         return redirect(url_for("sign_up"))
     
     with sqlite3.connect('job_tracker.db') as connection:

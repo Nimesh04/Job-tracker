@@ -16,7 +16,17 @@
             <img class="logo" src="{{ url_for('static', filename='Images/J-removebg.png') }}">
             <h1 class="main-title"> WELCOME <br> TO <br><i>JOB</i> TRACKER</h1>
         </div>
-        
+        <div class="flash-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flash_messages">
+                        {% for category, message in messages %}
+                            <li class =" {{ category }}"> {{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
         
         <div class="sign-up-form">
             <h2 class="signup-title">SIGN UP</h2>

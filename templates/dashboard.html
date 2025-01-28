@@ -34,24 +34,20 @@
             </div>
 
             <div class="table-content">
-                <!-- Example row (empty for now) -->
+                {% for result in results %}
                 <div class="table-row">
                     <input type="checkbox">
-                    <span></span> <!-- Company Name -->
-                    <span></span> <!-- Title -->
-                    <span></span> <!-- Status -->
-                    <span></span> <!-- Date Applied -->
-                    <span></span> <!-- Notes -->
+                    <span colspan="2">{{ result[2] }}</span> <!-- Company Name -->
+                    <span>{{ result[3] }}</span> <!-- Title -->
+                    <span>{{ result[4] }}</span> <!-- Status -->
+                    <span>{{ result[5] }}</span> <!-- Date Applied -->
+                    <span>{{ result[6] }}</span> <!-- Notes -->
                 </div>
-
+                {% else %}
                 <div class="table-row">
-                    <input type="checkbox">
-                    <span></span> <!-- Company Name -->
-                    <span></span> <!-- Title -->
-                    <span></span> <!-- Status -->
-                    <span></span> <!-- Date Applied -->
-                    <span></span> <!-- Notes -->
+                    <span colspan="5">No job applications found.</span>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </body>

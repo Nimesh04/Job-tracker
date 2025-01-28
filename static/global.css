@@ -119,6 +119,11 @@ body{
     border-bottom: 1px solid #ddd;
 }
 
+.table-row span{
+    flex: 1;
+    text-align: center;
+}
+
 .table-row input{
     margin-left: 10px;
 }
