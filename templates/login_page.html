@@ -7,28 +7,30 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap" rel="stylesheet">
         <title>Job Tracker - Login</title>
-        <link rel="stylesheet" href="../styles/login.css"> 
-        <link rel="shorcut icon" href="/Images/J-removebg.png">
+        <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}"> 
+        <link rel="shortcut icon" href="{{ url_for('static', filename= '/Images/J-removebg.png') }}">
     </head>
     
     <body>
         <div class="container">
             <div class="login_body">
                 <head>
-                    <img src="/Images/J-removebg.png" class="logo-bg">
+                    <img class="logo-bg" src="{{ url_for('static', filename='Images/J-removebg.png') }}">
                     <h1 class="title">Job tracker</h1>
                 </head>
-                    <form>
+                    <form method="POST" action="{{ url_for('login')}}">
                             <label for="username">Username</label>
-                            <input type="text" id="username" class="input-field" placeholder="Enter your username" >
+                            <input type="text" id="username" class="input-field" placeholder="Enter your username" name="username" >
     
                             <label for="password">Password</label>
-                            <input type="password" id="password" class="input-field" placeholder="Enter your password" >
+                            <input type="password" id="password" class="input-field" placeholder="Enter your password" name="password">
     
                             <div class="btn-container">
-                                <button type="submit" class="signup-btn">SIGN UP</button>
                                 <button type="submit" class="login-btn">LOGIN</button>
                             </div>
+                    </form>
+                    <form method="GET" action="/sign_up">
+                        <button type="submit" class="signup-btn">SIGN UP</button>
                     </form>
             </div>  
         </div>

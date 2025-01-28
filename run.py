@@ -1,6 +1,13 @@
 import sqlite3
 import bcrypt
 from datetime import datetime 
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+
+
+app = Flask(__name__)
+app.secret_key = "supersecretkey"
+
+
 
 status_bar = ['Applied', 'Rejected', 'Interview', 'Offer']
 
@@ -36,7 +43,39 @@ def create_tables():
 
 
 # register a user and add it to the database
-def register_users(username, email, password):
+@app.route("/")
+def home():
+    return render_template("sign_up.html")
+
+
+@app.route("/sign_up")
+def sign_up():
+    return render_template("sign_up.html")
+
+
+@app.route("/login_page")
+def login_page():
+    return render_template("login_page.html")
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
+
+@app.route("/register_users", methods=["POST"])
+def register_users():
+    username = request.form["username"]
+    email = request.form["email"]
+    password = request.form["password"]
+    confirm_password = request.form["confirm_password"]
+
+    if not username or not email or not password:
+        flash("All fields are required!", "error")
+        return redirect(url_for("sign_up"))
+    
+    if password != confirm_password:
+        flash("Password is different")
+        return redirect(url_for("sign_up"))
+    
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
         salt = bcrypt.gensalt()
@@ -45,40 +84,42 @@ def register_users(username, email, password):
         try:
             user_name = cursor.execute('''SELECT id FROM USERS WHERE username = ? or email= ?''',(username, email,))
             if user_name.fetchone():
-                raise ValueError("Username or email already exists")
-            else:
-                cursor.execute('''
-                        INSERT into USERS (username, email, password)
-                        VALUES (?,?,?)''',(username, email, hashed_password))
+                flash ("Username or email already exists", "error")
+                return redirect(url_for("sign_up"))
+            
+            cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (username, email, hashed_password))
+            connection.commit()
+            flash("Registration successful! Please log in.", "success")
+            return redirect(url_for("login_page"))
         except sqlite3.IntegrityError as e:
-            raise ValueError("Database constraint error: " + str(e))
+            flash("Database constraint error: " + str(e), "error")
+            return redirect(url_for("sign_up"))
+        
 
 
 # need to verify if the user is persent in the database or not.
-def login(username, password):
-    with sqlite3.connect('job_tracker.db') as connection:
-        cursor = connection.cursor()   
-        # if the user is present, then need to use that user's id to do all the job addition in the database.
-        try:
-            cursor.execute('''
-            SELECT password, id FROM USERS 
-            WHERE username = ?
-            ''', (username,))
-            login_password = cursor.fetchone()
-            stored_password = login_password[0]
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.form["username"]
+    password = request.form["password"]
 
-            # if the user isn't present, prompt them by saying they aren't authorized.
-            if not login_password:
-                raise ValueError("Username not found.")
+    with sqlite3.connect("job_tracker.db") as connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT password, id FROM users WHERE username = ?", (username,))
+        result = cursor.fetchone()
 
-            if not isinstance(stored_password, bytes):
-                stored_password = stored_password.encode('utf-8')
+        if not result:
+            flash("Invalid username or password.", "error")
+            return redirect(url_for("login_page"))
 
-            if login_password and bcrypt.checkpw(password.encode('utf-8'), stored_password):
-                return login_password[1]
-
-        except ValueError:
-            raise "Invalid Username or Password"
+        stored_password, user_id = result
+        if bcrypt.checkpw(password.encode("utf-8"), stored_password.encode("utf-8")):
+            session["user_id"] = user_id
+            flash("Login successful!", "success")
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Invalid username or password.", "error")
+            return redirect(url_for("login_page"))
 
 #check if the user_id exists
 def user_exists(user_id):
@@ -231,47 +272,50 @@ def filter(user_column, user_filter):
         raise ("Error, ", str(e))
 
 
-# implement user authentication for secure session managament  
-with sqlite3.connect('job_tracker.db') as connection:
-        cursor = connection.cursor()
-        cursor.execute('SELECT * FROM users')
-        results = cursor.fetchall()
-        for result in results:
-            print(result)
+# # implement user authentication for secure session managament  
+# with sqlite3.connect('job_tracker.db') as connection:
+#         cursor = connection.cursor()
+#         cursor.execute('SELECT * FROM users')
+#         results = cursor.fetchall()
+#         for result in results:
+#             print(result)
 
 
-user_name = input("Enter your username:")
-user_password = input("Enter your password: ")
+# user_name = input("Enter your username:")
+# user_password = input("Enter your password: ")
 
-user_id = login(user_name, user_password)
+# user_id = login(user_name, user_password)
 
-while user_id:
-    with sqlite3.connect('job_tracker.db') as connection:
-        cursor = connection.cursor()
-        cursor.execute('SELECT * FROM job_applications WHERE user_id = ? ', (user_id,))
-        results = cursor.fetchall()
-        for result in results:
-            print(result)
-    title = input("Enter the title:")
-    company_name = input("Enter the compay name:")
-    date_applied = input("Enter the date you applied to this:")
-    status = input("Enter the status:")
-    notes = input("Enter your notes: ")
-    add_job(user_id, title, company_name, date_applied, status, notes )
+# while user_id:
+#     with sqlite3.connect('job_tracker.db') as connection:
+#         cursor = connection.cursor()
+#         cursor.execute('SELECT * FROM job_applications WHERE user_id = ? ', (user_id,))
+#         results = cursor.fetchall()
+#         for result in results:
+#             print(result)
+#     title = input("Enter the title:")
+#     company_name = input("Enter the compay name:")
+#     date_applied = input("Enter the date you applied to this:")
+#     status = input("Enter the status:")
+#     notes = input("Enter your notes: ")
+#     add_job(user_id, title, company_name, date_applied, status, notes )
 
-    with sqlite3.connect('job_tracker.db') as connection:
-        cursor = connection.cursor()
-        cursor.execute('SELECT * FROM job_applications WHERE user_id = ? ', (user_id,))
-        results = cursor.fetchall()
-        for result in results:
-            print(result)
+#     with sqlite3.connect('job_tracker.db') as connection:
+#         cursor = connection.cursor()
+#         cursor.execute('SELECT * FROM job_applications WHERE user_id = ? ', (user_id,))
+#         results = cursor.fetchall()
+#         for result in results:
+#             print(result)
 
-    user_column = input("Enter the column that you want to filter form: ")
-    user_filter= input("Enter the parameter that you want to filter form: ").strip()
-
-
-
-    filter(user_column, user_filter)
-    exit()
+#     user_column = input("Enter the column that you want to filter form: ")
+#     user_filter= input("Enter the parameter that you want to filter form: ").strip()
 
 
+
+#     filter(user_column, user_filter)
+#     exit()
+
+
+if __name__ == "__main__":
+    create_tables()
+    app.run(debug=True)

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap" rel="stylesheet">    
+        <title>Job Tracker</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='global.css')}}">
+        <link rel="icon" href="/Images/J-removebg.png">
+    </head>
+
+    <body>
+        <div class="title-section">
+            <h1 class="title"> Job Tracker</h1>
+            <button class="account-button"> NB</button>
+        </div> 
+        
+        <div class="action-section">
+            <button class="add-job">Add job</button>
+            <button class="icon-button"><img src="{{ url_for('static', filename='Images/search icon.png')}}" alt="Search" ></button>
+            <button class="icon-button"><img src="{{ url_for('static', filename='Images/filter_bar.png')}}" alt="Filter"></button>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">
+                <span>Company name</span>
+                <span>Title</span>
+                <span>Status</span>
+                <span>Date applied </span>
+                <span>Notes</span>
+            </div>
+
+            <div class="table-content">
+                <!-- Example row (empty for now) -->
+                <div class="table-row">
+                    <input type="checkbox">
+                    <span></span> <!-- Company Name -->
+                    <span></span> <!-- Title -->
+                    <span></span> <!-- Status -->
+                    <span></span> <!-- Date Applied -->
+                    <span></span> <!-- Notes -->
+                </div>
+
+                <div class="table-row">
+                    <input type="checkbox">
+                    <span></span> <!-- Company Name -->
+                    <span></span> <!-- Title -->
+                    <span></span> <!-- Status -->
+                    <span></span> <!-- Date Applied -->
+                    <span></span> <!-- Notes -->
+                </div>
+            </div>
+        </div>
+    </body>
+    
+</html>

@@ -1,0 +1,139 @@
+body{
+    background: linear-gradient(to right, #8C52FF, #5CE1E6);
+    font-family: "Julius Sans One", serif;
+    font-size: 18px;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.title-section{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 40px;
+    color: white;
+    position: relative;
+}
+
+.title{
+    font-size: 32px;
+    text-transform: uppercase;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.account-button{
+    margin-left: auto;
+    background-color: white;
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor:pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center  
+}
+
+.account-button:hover{
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+}
+
+.action-section{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-right: 30px;
+}
+
+.add-job{
+    font-family: "Julius Sans One", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 24px;
+    background: white;
+    cursor: pointer;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    transition: 0.3s;
+}
+
+.add-job:hover{
+    background: #f0f0f0;
+}
+
+.icon-button{
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 15px;
+}
+
+.icon-button img{
+    width: 40px;
+    height: 40px;
+}
+
+
+.table-container{
+    background: white;
+    margin: 20px auto;
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    max-width: 1800px;
+    padding: 10px;
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+}
+
+.table-header{
+    display: flex;
+    flex-direction: space-between;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 15px;
+    border-bottom: 2px solid #ccc;
+}
+
+.table-header span{
+    flex: 1;
+    text-align: center;
+}
+
+.table-content{
+    display: flex;
+    flex-direction: column;
+}
+
+.table-row{
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.table-row input{
+    margin-left: 10px;
+}
+
+@media (max-width: 768px) {
+    .title-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .action-section {
+        justify-content: center;
+    }
+
+    .table-header span, .table-row span {
+        font-size: 14px;
+    }
+}

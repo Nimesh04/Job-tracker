@@ -7,38 +7,38 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap" rel="stylesheet">
         <title>Job Tracker</title>
-        <link rel="stylesheet" href="/styles/signup.css">
-        <link rel="shorcut icon" href="/Images/J-removebg.png">
+        <link rel="stylesheet" href="{{ url_for('static', filename='signup.css') }}">
+        <link rel="shortcut icon" href="{{url_for('static', filename='/Images/J-removebg.png' )}}">
     </head>
 
     <body>
         <div class="left-section">
-            <img class="logo" src="/Images/J-removebg.png">
+            <img class="logo" src="{{ url_for('static', filename='Images/J-removebg.png') }}">
             <h1 class="main-title"> WELCOME <br> TO <br><i>JOB</i> TRACKER</h1>
         </div>
         
         
         <div class="sign-up-form">
             <h2 class="signup-title">SIGN UP</h2>
-                <form>
+                <form method="POST" action="{{ url_for('register_users') }}">
                     <label for="signup-username">Username</label>
-                    <input type="text" id="signup-username" class="input-field">
+                    <input type="text" id="signup-username" class="input-field" name="username" required>
 
                     <label for="signup-email">Email</label>
-                    <input type="email" id="signup-email" class="input-field">
+                    <input type="email" id="signup-email" class="input-field" name="email" required>
 
                     <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" class="input-field">
+                    <input type="password" id="signup-password" class="input-field" name="password" required>
 
                     <label for="signup-confirm-password">Confirm Password</label>
-                    <input type="password" id="signup-confirm-password" class="input-field">
-
+                    <input type="password" id="signup-confirm-password" class="input-field" name="confirm_password" required> 
 
                     <div class="signup-btn-container">
                         <button type="submit" class="signup-btn"> SIGN UP</button>
-                        <button type="submit" class="login-btn"> LOGIN</button>
                     </div>
-                    
+                </form>
+                <form method="GET" action="/login_page">
+                    <button type="submit" class="login-btn"> LOGIN</button>
                 </form>
         </div>
 
