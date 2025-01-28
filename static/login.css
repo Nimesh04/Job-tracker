@@ -89,13 +89,13 @@ form label{
 .signup-btn{
     font-family: "Julius Sans One", serif;
     font-weight: 400;
-    font-size: 52px;
+    font-size: 64px;
     width: 100%;
     height:50px;
     padding: 15px 0;
     font-size: 18px;
     border-radius: 24px;
-    margin-right: 20px;
+    margin:0 20px 20px 0;
     padding: 0 20px;
     background: linear-gradient(to right, #3B81D1, #5CE1E6);
     border: 2px;
@@ -104,16 +104,16 @@ form label{
 }
 
 .signup-btn:hover{
-    background: linear-gradient(to right, #2a5fa5, #47b5c6);
+    background:  #47b5c6;
     box-shadow: 5px 8px 15px rgba(0, 0, 0, 0.5);
 }
 .login-btn{
     font-family: "Julius Sans One", serif;
     font-weight: 400;
     font-style: normal;
-    font-size: 18px;
+    font-size: 24px;
     width: 100%;
-    padding: 0 20px;
+    padding: 10px;
     background: none;
     border: none;
     border-radius: 24px;
@@ -121,5 +121,5 @@ form label{
 }
 
 .login-btn:hover{
-    background: linear-gradient(to right, #ffffff, #c829d6);
+    background: #969595;
 }
