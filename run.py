@@ -1,7 +1,7 @@
 import sqlite3
 import bcrypt
 from datetime import datetime 
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 
 
 app = Flask(__name__)
@@ -145,16 +145,25 @@ def user_exists(user_id):
 
 
 #add the jobs and all the detail in the table
-def add_job(user_id, title, company_name, date_applied, status, notes = None):
+@app.route("/add_job", methods=["POST"])
+def add_job():
+    if "user_id" not in session:
+        return jsonify({"success":False, "message": "User not logged in"}), 401
+    
+    data = request.get_json()
+    user_id = session["user_id"]
+    company = data.get("company")
+    title = data.get("title")
+    status = data.get("status")
+    date_applied = data.get("date_applied")
+    notes = data.get("notes")
+
+    if not company or not title or not status or not date_applied:
+        return jsonify({"success": False, "message": "All fields are required!"})
+    
     try:
-        if not user_exists(user_id):
-            raise ValueError(f"{user_id} doesn't exists.")
-        
         #convert the date string into the date
         date = datetime.strptime(date_applied, '%Y-%m-%d').date()
-
-        if status not in status_bar:
-            raise ValueError(f"Invalid status. Allowed status are: {status_bar}")
 
         with sqlite3.connect('job_tracker.db') as connection:
             cursor = connection.cursor()
@@ -162,9 +171,13 @@ def add_job(user_id, title, company_name, date_applied, status, notes = None):
             cursor.execute('''
                 INSERT into job_applications (user_id, title, company_name, date_applied, status, notes)
                         VALUES(?,?,?,?,?,?)
-                        ''', (user_id, title, company_name, date, status, notes))
+                        ''', (user_id, title, company, date, status, notes))
+            
+            connection.commit()
+
+        return jsonify({"success": True, "message": "Job added successfully!"})
     except sqlite3.IntegrityError as e:
-        raise "Please use correct values."
+        return jsonify({"success": False, "message": str(e)})
 
 
 def valid_id(id):
@@ -283,50 +296,6 @@ def filter(user_column, user_filter):
                 print(result)
     except sqlite3.InterfaceError as e:
         raise ("Error, ", str(e))
-
-
-# # implement user authentication for secure session managament  
-# with sqlite3.connect('job_tracker.db') as connection:
-#         cursor = connection.cursor()
-#         cursor.execute('SELECT * FROM users')
-#         results = cursor.fetchall()
-#         for result in results:
-#             print(result)
-
-
-# user_name = input("Enter your username:")
-# user_password = input("Enter your password: ")
-
-# user_id = login(user_name, user_password)
-
-# while user_id:
-#     with sqlite3.connect('job_tracker.db') as connection:
-#         cursor = connection.cursor()
-#         cursor.execute('SELECT * FROM job_applications WHERE user_id = ? ', (user_id,))
-#         results = cursor.fetchall()
-#         for result in results:
-#             print(result)
-#     title = input("Enter the title:")
-#     company_name = input("Enter the compay name:")
-#     date_applied = input("Enter the date you applied to this:")
-#     status = input("Enter the status:")
-#     notes = input("Enter your notes: ")
-#     add_job(user_id, title, company_name, date_applied, status, notes )
-
-#     with sqlite3.connect('job_tracker.db') as connection:
-#         cursor = connection.cursor()
-#         cursor.execute('SELECT * FROM job_applications WHERE user_id = ? ', (user_id,))
-#         results = cursor.fetchall()
-#         for result in results:
-#             print(result)
-
-#     user_column = input("Enter the column that you want to filter form: ")
-#     user_filter= input("Enter the parameter that you want to filter form: ").strip()
-
-
-
-#     filter(user_column, user_filter)
-#     exit()
 
 
 if __name__ == "__main__":

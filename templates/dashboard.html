@@ -24,7 +24,7 @@
                 <div class="modal-content">
                     <span class="close">&times;</span>
                     <h2>Add Job</h2>
-                    <form id="job-form">
+                    <form id="jobForm">
                         <label for="company">Company Name</label>
                         <input id="company" type="text" name="company" required>
 
@@ -69,8 +69,8 @@
                     <input type="checkbox">
                     <span colspan="2">{{ result[2] }}</span> <!-- Company Name -->
                     <span>{{ result[3] }}</span> <!-- Title -->
-                    <span>{{ result[4] }}</span> <!-- Status -->
-                    <span>{{ result[5] }}</span> <!-- Date Applied -->
+                    <span>{{ result[5] }}</span> <!-- Status -->
+                    <span>{{ result[4] }}</span> <!-- Date Applied -->
                     <span>{{ result[6] }}</span> <!-- Notes -->
                 </div>
                 {% else %}
