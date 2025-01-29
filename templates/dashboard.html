@@ -9,7 +9,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap" rel="stylesheet">    
         <title>Job Tracker</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='global.css')}}">
-        <link rel="icon" href="/Images/J-removebg.png">
+        <link rel="icon" href="{{ url_for('static', filename='/Images/J-removebg.png' )}}">
     </head>
 
     <body>
@@ -19,7 +19,37 @@
         </div> 
         
         <div class="action-section">
-            <button class="add-job">Add job</button>
+            <button id="openModalBtn" class="add-job">Add job</button>
+            <div id="job_modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Add Job</h2>
+                    <form id="job-form">
+                        <label for="company">Company Name</label>
+                        <input id="company" type="text" name="company" required>
+
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" required>
+
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="Applied">Applied</option>
+                            <option value="Interview">Interview</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Offer">Offer</option>
+                        </select>
+
+                        <label for="date_applied">Date Applied</label>
+                        <input type="date" id="date_applied" name="date_applied" required>
+
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes"></textarea>
+
+                        <button type="submit" class="save-job">Save</button>
+                        <button type="button" class="close-modal">Cancel</button>
+                    </form>
+                </div>
+            </div>
             <button class="icon-button"><img src="{{ url_for('static', filename='Images/search icon.png')}}" alt="Search" ></button>
             <button class="icon-button"><img src="{{ url_for('static', filename='Images/filter_bar.png')}}" alt="Filter"></button>
         </div>
@@ -50,6 +80,8 @@
                 {% endfor %}
             </div>
         </div>
+
+        <script src="{{ url_for('static', filename='scripts/dashboard.js')}}"></script>
     </body>
     
 </html>
