@@ -3,7 +3,7 @@
     
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Julius+Sans+One&display=swap" rel="stylesheet">    
@@ -25,6 +25,7 @@
                     <span class="close">&times;</span>
                     <h2>Add Job</h2>
                     <form id="jobForm">
+
                         <label for="company">Company Name</label>
                         <input id="company" type="text" name="company" required>
 
@@ -56,6 +57,7 @@
 
         <div class="table-container">
             <div class="table-header">
+                <button type="submit" class="delete-job" id="delete-button"><img src="{{ url_for('static', filename='Images/trash.png')}}" alt="Delete"></button>
                 <span>Company name</span>
                 <span>Title</span>
                 <span>Status</span>
@@ -65,10 +67,10 @@
 
             <div class="table-content">
                 {% for result in results %}
-                <div class="table-row">
-                    <input type="checkbox">
-                    <span colspan="2">{{ result[2] }}</span> <!-- Company Name -->
-                    <span>{{ result[3] }}</span> <!-- Title -->
+                <div class="table-row" data-id="{{ result[0] }}">
+                    <input type="checkbox" class="checkbox">
+                    <span>{{ result[3] }}</span> <!-- Company Name -->
+                    <span>{{ result[2] }}</span> <!-- Title -->
                     <span>{{ result[5] }}</span> <!-- Status -->
                     <span>{{ result[4] }}</span> <!-- Date Applied -->
                     <span>{{ result[6] }}</span> <!-- Notes -->

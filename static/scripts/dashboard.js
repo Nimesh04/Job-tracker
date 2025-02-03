@@ -4,7 +4,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeModalBtns = document.querySelectorAll(".close, .close-modal");
     const jobForm = document.getElementById("jobForm");
     const tableContent = document.querySelector(".table-content");
+    const deleteJob = document.getElementById("delete-button");
+    
 
+
+    
     // Open Modal
     if (openModalBtn) {
         openModalBtn.addEventListener("click", () => {
@@ -73,4 +77,46 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => console.error("Error:", error));
         });
     }
+
+    // Handle the job delete part
+    document.addEventListener("click", (event) => {
+        if (event.target.classList.contains("checkbox")) {
+            const checkBoxes = document.querySelectorAll(".checkbox");
+            const anyChecked = [...checkBoxes].some(cb => cb.checked);
+            
+            if(anyChecked){
+                deleteJob.classList.add("show");
+            }else{
+                deleteJob.classList.remove("show");
+            }
+        }
+    });
+
+    deleteJob.addEventListener("click", () => {
+        const checkedRows = document.querySelectorAll(".checkbox:checked");
+        if (checkedRows.length === 0) return;
+
+        if (!confirm("Are you sure you want to delete the selected jobs?")) return;
+
+        const jobIds = [...checkedRows].map(cb => cb.closest(".table-row").dataset.id);
+
+        // Send request to Flask backend to delete jobs
+        fetch("/delete-job", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ job_ids: jobIds }) // Send array of IDs
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove deleted rows from UI
+                checkedRows.forEach(cb => cb.closest(".table-row").remove());
+                deleteJob.classList.remove("show"); // Hide button after delete
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+
 });

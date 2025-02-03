@@ -191,17 +191,25 @@ def valid_id(id):
 
 
 # remove the job based on the id from the job tracker database
-def delete_jobs(id):
+@app.route('/delete-job', methods=["POST"])
+def delete_jobs():
     try:
-        if not valid_id(id):
-            raise ValueError(f"{id} isn't available")
-        
+        data = request.get_json()
+        job_ids = data.get("job_ids", [])
+
+        if not job_ids:
+            return jsonify({"success": False, "message": "No job IDs provided."})
+
         with sqlite3.connect('job_tracker.db') as connection:
             cursor = connection.cursor()
-            cursor.execute('''DELETE FROM job_applications Where id = ?''', (id,))
-            return("Job application deleted successfully.")
-    except sqlite3.IntegrityError as e:
-        return "Provide valid id."
+            cursor.executemany("DELETE FROM job_applications WHERE id = ?", [(job_id,) for job_id in job_ids])
+
+        return jsonify({"success": True, "message": "Job(s) deleted successfully."})
+
+    except sqlite3.IntegrityError:
+        return jsonify({"success": False, "message": "Invalid job ID(s) provided."})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
 
 
 #update the status part of the job tracking

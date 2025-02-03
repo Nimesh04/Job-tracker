@@ -128,6 +128,29 @@ body{
     margin-left: 10px;
 }
 
+.delete-job{
+    border: none;
+    background: none;
+    border-radius: 14px;
+    opacity: 0; /* Start hidden */
+    visibility: hidden; /* Prevent interaction when hidden */
+    transform: scale(0.8); /* Optional: Shrink effect */
+    transition: opacity 0.5s ease, transform 0.3s ease, visibility 0.5s;
+}
+
+.delete-job.show {
+    opacity: 1; /* Fully visible */
+    visibility: visible;
+    transform: scale(1); /* Grow effect */
+}
+
+.delete-job img {
+    height: 90% ;
+    max-width: 20px;
+    max-height: 20px;
+    width: 90%;
+}
+
 
 .modal{
     display: none;
