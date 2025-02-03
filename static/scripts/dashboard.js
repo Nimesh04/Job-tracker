@@ -5,10 +5,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const jobForm = document.getElementById("jobForm");
     const tableContent = document.querySelector(".table-content");
     const deleteJob = document.getElementById("delete-button");
-    
+    const profileButton = document.getElementById("profile_button");
+    const profileSection = document.getElementById("profile_section");
 
+    // Toggle profile dropdown visibility
+    profileButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        profileSection.classList.toggle("show");
+    });
 
-    
+    // Hide profile dropdown when clicking outside
+    document.addEventListener("click", (event) => {
+        if (!profileSection.contains(event.target) && profileSection.classList.contains("show")) {
+            profileSection.classList.remove("show");
+        }
+    });
+
     // Open Modal
     if (openModalBtn) {
         openModalBtn.addEventListener("click", () => {
@@ -118,5 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(error => console.error("Error:", error));
     });
+
+
 
 });

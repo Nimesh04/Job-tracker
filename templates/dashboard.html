@@ -14,9 +14,16 @@
 
     <body>
         <div class="title-section">
-            <h1 class="title"> Job Tracker</h1>
-            <button class="account-button"> NB</button>
-        </div> 
+            <h1 class="title">Job Tracker</h1>
+            <div class="profile-container">
+                <button class="account-button" id="profile_button">NB</button>
+                <div class="profile-section" id="profile_section">
+                    <a href="{{ url_for('logout') }}" class="logout-btn">Log out</a>
+                </div>
+            </div>
+        </div>
+        
+        
         
         <div class="action-section">
             <button id="openModalBtn" class="add-job">Add job</button>

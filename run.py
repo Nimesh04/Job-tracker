@@ -1,79 +1,97 @@
 import sqlite3
 import bcrypt
-from datetime import datetime 
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-
+from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    login_user,
+    current_user,
+    logout_user,
+    login_required
+)
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-
+# Initialize Flask-Login
+login_manager = LoginManager(app)
+login_manager.login_view = 'login_page'  # Redirects unauthorized users to the login page
 
 status_bar = ['Applied', 'Rejected', 'Interview', 'Offer']
 
-# create the tables for the database
+# Define a User class for Flask-Login
+class User(UserMixin):
+    def __init__(self, id, username, email, password):
+        self.id = id
+        self.username = username
+        self.email = email
+        self.password = password
+
+# User loader callback for Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    with sqlite3.connect("job_tracker.db") as connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT id, username, email, password FROM users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
+        if user is None:
+            return None
+        return User(*user)
+
+# Create the tables for the database
 def create_tables():
-    connection  = sqlite3.connect("job_tracker.db")
+    connection = sqlite3.connect("job_tracker.db")
     connection.execute("PRAGMA foreign_keys = ON")
     cursor = connection.cursor()
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL UNIQUE,
-                email TEXT NOT NULL,
-                password TEXT NOT NULL)
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL UNIQUE,
+            email TEXT NOT NULL,
+            password TEXT NOT NULL)
     ''')
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS job_applications(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                title TEXT NOT NULL,
-                company_name TEXT NOT NULL,
-                date_applied TEXT NOT NULL,
-                status TEXT NOT NULL,
-                notes TEXT,
-                FOREIGN KEY (user_id) REFERENCES users (id))
-    '''
-    )
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            company_name TEXT NOT NULL,
+            date_applied TEXT NOT NULL,
+            status TEXT NOT NULL,
+            notes TEXT,
+            FOREIGN KEY (user_id) REFERENCES users (id))
+    ''')
 
     connection.commit()
     connection.close()
 
-
-# register a user and add it to the database
 @app.route("/")
 def home():
     return render_template("sign_up.html")
-
 
 @app.route("/sign_up")
 def sign_up():
     return render_template("sign_up.html")
 
-
 @app.route("/login_page")
 def login_page():
     return render_template("login_page.html")
 
+# Protect the dashboard using Flask-Login's decorator
 @app.route("/dashboard")
+@login_required
 def dashboard():
-
-    user_id = session["user_id"]
-
-    if not user_id:
-        flash("Please log in to access the dashboard.", "error")
-        return redirect(url_for("login_page"))
-
+    user_id = current_user.id
     with sqlite3.connect("job_tracker.db") as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM job_applications WHERE user_id = ?", (user_id,))
         results = cursor.fetchall()
-
-
     return render_template("dashboard.html", results=results)
 
+# Register a new user
 @app.route("/register_users", methods=["POST"])
 def register_users():
     username = request.form["username"]
@@ -86,31 +104,29 @@ def register_users():
         return redirect(url_for("sign_up"))
     
     if password != confirm_password:
-        flash("Password is different", "error")
+        flash("Passwords do not match", "error")
         return redirect(url_for("sign_up"))
     
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
-        #checking if the username or the email already exsits in the database or not. if it doesn't then the new user is added.
         try:
-            user_name = cursor.execute('''SELECT id FROM USERS WHERE username = ? or email= ?''',(username, email,))
-            if user_name.fetchone():
-                flash ("Username or email already exists", "error")
+            cursor.execute('SELECT id FROM users WHERE username = ? OR email = ?', (username, email))
+            if cursor.fetchone():
+                flash("Username or email already exists", "error")
                 return redirect(url_for("sign_up"))
             
-            cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (username, email, hashed_password))
+            cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+                           (username, email, hashed_password))
             connection.commit()
             flash("Registration successful! Please log in.", "success")
             return redirect(url_for("login_page"))
         except sqlite3.IntegrityError as e:
             flash("Database constraint error: " + str(e), "error")
             return redirect(url_for("sign_up"))
-        
 
-
-# need to verify if the user is persent in the database or not.
+# Login endpoint using Flask-Login's login_user
 @app.route("/login", methods=["POST"])
 def login():
     username = request.form["username"]
@@ -118,40 +134,37 @@ def login():
 
     with sqlite3.connect("job_tracker.db") as connection:
         cursor = connection.cursor()
-        cursor.execute("SELECT password, id FROM users WHERE username = ?", (username,))
+        cursor.execute("SELECT id, password, username, email FROM users WHERE username = ?", (username,))
         result = cursor.fetchone()
 
         if not result:
             flash("Invalid username or password.", "error")
             return redirect(url_for("login_page"))
 
-        stored_password, user_id = result
+        user_id, stored_password, user_name, user_email = result
         if bcrypt.checkpw(password.encode("utf-8"), stored_password.encode("utf-8")):
-            session["user_id"] = user_id
+            user = User(user_id, user_name, user_email, stored_password)
+            login_user(user)  # Manage the user session with Flask-Login
             flash("Login successful!", "success")
             return redirect(url_for("dashboard"))
         else:
             flash("Invalid username or password.", "error")
             return redirect(url_for("login_page"))
 
-#check if the user_id exists
-def user_exists(user_id):
-    with sqlite3.connect('job_tracker.db') as connection:
-        cursor = connection.cursor()
-        cursor.execute('''
-            SELECT * from users 
-            WHERE id = ?''', (user_id,))
-        return cursor.fetchone() is not None
+# Logout endpoint
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()  # Flask-Login handles session cleanup
+    flash("You have been logged out.", "success")
+    return redirect(url_for('login_page'))
 
-
-#add the jobs and all the detail in the table
+# Add a job application (requires login)
 @app.route("/add_job", methods=["POST"])
+@login_required
 def add_job():
-    if "user_id" not in session:
-        return jsonify({"success":False, "message": "User not logged in"}), 401
-    
     data = request.get_json()
-    user_id = session["user_id"]
+    user_id = current_user.id
     company = data.get("company")
     title = data.get("title")
     status = data.get("status")
@@ -162,124 +175,110 @@ def add_job():
         return jsonify({"success": False, "message": "All fields are required!"})
     
     try:
-        #convert the date string into the date
+        # Convert the date string into a date object
         date = datetime.strptime(date_applied, '%Y-%m-%d').date()
-
         with sqlite3.connect('job_tracker.db') as connection:
             cursor = connection.cursor()
-
             cursor.execute('''
-                INSERT into job_applications (user_id, title, company_name, date_applied, status, notes)
-                        VALUES(?,?,?,?,?,?)
-                        ''', (user_id, title, company, date, status, notes))
-            
+                INSERT INTO job_applications (user_id, title, company_name, date_applied, status, notes)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (user_id, title, company, date, status, notes))
             connection.commit()
-
         return jsonify({"success": True, "message": "Job added successfully!"})
     except sqlite3.IntegrityError as e:
         return jsonify({"success": False, "message": str(e)})
 
-
-def valid_id(id):
+# Helper: check if a user exists
+def user_exists(user_id):
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
-        cursor.execute('''
-            SELECT id FROM job_applications WHERE id = ?
-        ''', (id,))
+        cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
         return cursor.fetchone() is not None
 
+# Helper: check if job application ID exists
+def valid_id(job_id):
+    with sqlite3.connect('job_tracker.db') as connection:
+        cursor = connection.cursor()
+        cursor.execute('SELECT id FROM job_applications WHERE id = ?', (job_id,))
+        return cursor.fetchone() is not None
 
-
-# remove the job based on the id from the job tracker database
+# Delete jobs endpoint (requires login)
 @app.route('/delete-job', methods=["POST"])
+@login_required
 def delete_jobs():
     try:
         data = request.get_json()
         job_ids = data.get("job_ids", [])
-
         if not job_ids:
             return jsonify({"success": False, "message": "No job IDs provided."})
-
         with sqlite3.connect('job_tracker.db') as connection:
             cursor = connection.cursor()
-            cursor.executemany("DELETE FROM job_applications WHERE id = ?", [(job_id,) for job_id in job_ids])
-
+            cursor.executemany("DELETE FROM job_applications WHERE id = ?",
+                               [(job_id,) for job_id in job_ids])
         return jsonify({"success": True, "message": "Job(s) deleted successfully."})
-
     except sqlite3.IntegrityError:
         return jsonify({"success": False, "message": "Invalid job ID(s) provided."})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
 
-
-#update the status part of the job tracking
-def update_status(user_id, id, new_status):
+# Update job application status
+def update_status(user_id, job_id, new_status):
     try:
-        if not valid_id(id):
-            raise ValueError(f"{id} is an invalid ID.")
+        if not valid_id(job_id):
+            raise ValueError(f"{job_id} is an invalid ID.")
         if not user_exists(user_id):
             raise ValueError(f"{user_id} doesn't exist")
         if new_status not in status_bar:
             raise ValueError("Invalid status")
-        
         with sqlite3.connect('job_tracker.db') as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                    UPDATE job_applications
-                           SET status = ?
-                           WHERE user_id= ? AND id = ?
-                           ''', (new_status, user_id, id,))
-
+                UPDATE job_applications
+                SET status = ?
+                WHERE user_id = ? AND id = ?
+            ''', (new_status, user_id, job_id))
     except sqlite3.IntegrityError as e:
         return "Use valid status"
 
-
-#delete users account
+# Delete user account (helper function)
 def delete_users(username, id):
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
-        cursor.execute('DELETE FROM users WHERE username = ? and id = ? ', (username, id))
+        cursor.execute('DELETE FROM users WHERE username = ? and id = ?', (username, id))
 
-#Next things that need to be implemented
-# Search and filter functionality for jobs
+# Search for job applications
 def search(word):
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
         try:
             cursor.execute('''
-                           SELECT * FROM job_applications
-                           WHERE title COLLATE NOCASE LIKE ? 
-                           or company_name COLLATE NOCASE LIKE ? 
-                           or status COLLATE NOCASE LIKE ?
-                           ''', (f'%{word}%', f'%{word}%', f'%{word}%',) )
+                SELECT * FROM job_applications
+                WHERE title COLLATE NOCASE LIKE ?
+                OR company_name COLLATE NOCASE LIKE ?
+                OR status COLLATE NOCASE LIKE ?
+            ''', (f'%{word}%', f'%{word}%', f'%{word}%'))
             search_result = cursor.fetchall()
             for result in search_result:
                 print(result)
         except sqlite3.IntegrityError as e:
-            raise ("Error:",str(e))
+            raise Exception("Error: " + str(e))
 
-
-
-#filter functionality
+# Filter job applications
 def filter(user_column, user_filter):
     column_map = {
-    'status': 'status',
-    'date': 'date'
+        'status': 'status',
+        'date': 'date_applied'
     }
-
-    user_input = {
-    'status': None,
-    'date': None
-    }
-
     if user_column not in column_map:
         print("Invalid column name")
+        return
 
     if user_column.lower() == 'status':
         filters = [status.strip().capitalize() for status in user_filter.split(',')]
-        invalid_filters = [status for status in filters if status not in status_bar ]
+        invalid_filters = [status for status in filters if status not in status_bar]
         if invalid_filters:
             print('Invalid filters')
+            return
     else:
         filters = [user_filter]
 
@@ -287,13 +286,13 @@ def filter(user_column, user_filter):
     if len(filters) > 1:
         placeholder = ', '.join(['?'] * len(filters))
         query = f'''
-        SELECT * FROM job_applications
-        WHERE {column_name} COLLATE NOCASE IN ({placeholder})
+            SELECT * FROM job_applications
+            WHERE {column_name} COLLATE NOCASE IN ({placeholder})
         '''
     else:
         query = f'''
-        SELECT * FROM job_applications
-        WHERE {column_name} COLLATE NOCASE = ?
+            SELECT * FROM job_applications
+            WHERE {column_name} COLLATE NOCASE = ?
         '''
     try:
         with sqlite3.connect('job_tracker.db') as connection:
@@ -303,8 +302,7 @@ def filter(user_column, user_filter):
             for result in filter_result:
                 print(result)
     except sqlite3.InterfaceError as e:
-        raise ("Error, ", str(e))
-
+        raise Exception("Error: " + str(e))
 
 if __name__ == "__main__":
     create_tables()
