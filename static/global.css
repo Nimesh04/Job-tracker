@@ -92,7 +92,7 @@ body{
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-right: 30px;
+    margin-right: 70px;
 }
 
 .add-job{
@@ -117,12 +117,45 @@ body{
     background: none;
     border: none;
     cursor: pointer;
-    margin-left: 15px;
 }
 
 .icon-button img{
     width: 40px;
     height: 40px;
+}
+
+.search-bar {
+    margin: 5px 0px 5px 10px;
+    padding: 10px 15px;
+    font-family: "Julius Sans One", serif;
+    font-size: 18px;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    transition: border 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    width: 100%;           /* Allow it to fill available space */
+    max-width: 400px;      /* Limit width on larger screens */
+    outline: none;
+}
+
+.search-bar:focus {
+    border: 1px solid purple;
+    box-shadow: 2px 2px 12px rgba(128, 0, 128, 0.4);
+}
+
+#filterForm label {
+    display: block;
+    margin-bottom: 5px;
+}
+#filterForm input[type="date"] {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.job-title {
+    font-size: 18px; /* Adjust as needed */
+    text-transform: none;
+    text-align: center;
 }
 
 
@@ -258,6 +291,15 @@ input, select, textarea{
     color: white;
 }
 
+/* Responsive adjustments for smaller screens */
+@media (max-width: 600px) {
+    .search-bar {
+         font-size: 16px;
+         padding: 8px 12px;
+         width: 90%;       /* Use a percentage width to fit the viewport */
+         max-width: none;  /* Remove the max-width constraint on small screens */
+    }
+}
 
 @media (max-width: 768px) {
     .title-section {

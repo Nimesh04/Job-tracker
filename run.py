@@ -70,7 +70,7 @@ def create_tables():
 
 @app.route("/")
 def home():
-    return render_template("sign_up.html")
+    return render_template("login_page.html")
 
 @app.route("/sign_up")
 def sign_up():
@@ -247,62 +247,78 @@ def delete_users(username, id):
         cursor.execute('DELETE FROM users WHERE username = ? and id = ?', (username, id))
 
 # Search for job applications
-def search(word):
+@app.route("/search", methods=["POST"])
+@login_required
+def search():
+    data = request.get_json()
+    query = data.get("query", "")
+    user_id = current_user.id
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
-        try:
-            cursor.execute('''
-                SELECT * FROM job_applications
-                WHERE title COLLATE NOCASE LIKE ?
-                OR company_name COLLATE NOCASE LIKE ?
-                OR status COLLATE NOCASE LIKE ?
-            ''', (f'%{word}%', f'%{word}%', f'%{word}%'))
-            search_result = cursor.fetchall()
-            for result in search_result:
-                print(result)
-        except sqlite3.IntegrityError as e:
-            raise Exception("Error: " + str(e))
+        cursor.execute("""
+        SELECT * FROM job_applications
+        WHERE user_id = ? AND (company_name LIKE ? OR title LIKE ? OR notes LIKE ?)
+    """, (user_id, f'%{query}%', f'%{query}%', f'%{query}%'))
+        results = cursor.fetchall()
+    jobs = []
+    for row in results:
+        jobs.append({
+            "id": row[0],
+            "user_id": row[1],
+            "title": row[2],
+            "company_name": row[3],
+            "date_applied": row[4],
+            "status": row[5],
+            "notes": row[6]
+        })
+    return jsonify({"success": True, "results": jobs})
 
-# Filter job applications
-def filter(user_column, user_filter):
-    column_map = {
-        'status': 'status',
-        'date': 'date_applied'
-    }
-    if user_column not in column_map:
-        print("Invalid column name")
-        return
 
-    if user_column.lower() == 'status':
-        filters = [status.strip().capitalize() for status in user_filter.split(',')]
-        invalid_filters = [status for status in filters if status not in status_bar]
-        if invalid_filters:
-            print('Invalid filters')
-            return
-    else:
-        filters = [user_filter]
+@app.route("/advanced_filter", methods=["POST"])
+@login_required
+def advanced_filter():
+    data = request.get_json()
+    statuses = data.get("status", [])   # Expecting a list of statuses
+    date_from = data.get("date_from", None)
+    date_to = data.get("date_to", None)
+    
+    query = "SELECT * FROM job_applications WHERE user_id = ?"
+    params = [current_user.id]
+    
+    if statuses:
+        # Build an IN clause with the selected statuses
+        placeholders = ','.join('?' * len(statuses))
+        query += f" AND status COLLATE NOCASE IN ({placeholders})"
+        params.extend(statuses)
+    
+    if date_from:
+        query += " AND date_applied >= ?"
+        params.append(date_from)
+    
+    if date_to:
+        query += " AND date_applied <= ?"
+        params.append(date_to)
+    
+    with sqlite3.connect('job_tracker.db') as connection:
+        cursor = connection.cursor()
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+    
+    jobs = []
+    for row in results:
+        jobs.append({
+            "id": row[0],
+            "user_id": row[1],
+            "title": row[2],
+            "company_name": row[3],
+            "date_applied": row[4],
+            "status": row[5],
+            "notes": row[6]
+        })
+    
+    return jsonify({"success": True, "results": jobs})
 
-    column_name = column_map[user_column]
-    if len(filters) > 1:
-        placeholder = ', '.join(['?'] * len(filters))
-        query = f'''
-            SELECT * FROM job_applications
-            WHERE {column_name} COLLATE NOCASE IN ({placeholder})
-        '''
-    else:
-        query = f'''
-            SELECT * FROM job_applications
-            WHERE {column_name} COLLATE NOCASE = ?
-        '''
-    try:
-        with sqlite3.connect('job_tracker.db') as connection:
-            cursor = connection.cursor()
-            cursor.execute(query, filters)
-            filter_result = cursor.fetchall()
-            for result in filter_result:
-                print(result)
-    except sqlite3.InterfaceError as e:
-        raise Exception("Error: " + str(e))
+
 
 if __name__ == "__main__":
     create_tables()

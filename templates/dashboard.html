@@ -58,8 +58,45 @@
                     </form>
                 </div>
             </div>
+            <input type="text" class="search-bar" placeholder="Search">
             <button class="icon-button"><img src="{{ url_for('static', filename='Images/search icon.png')}}" alt="Search" ></button>
             <button class="icon-button"><img src="{{ url_for('static', filename='Images/filter_bar.png')}}" alt="Filter"></button>
+            <!-- Advanced Filter Modal -->
+                <div id="filter_modal" class="modal">
+                    <div class="modal-content">
+                    <span class="close" id="filter_close">&times;</span>
+                    <h2>Filter</h2>
+                    <form id="filterForm">
+                        <fieldset>
+                        <legend>Select Columns to Display</legend>
+                        <label style="display:block;"><input type="checkbox" name="columns" value="company_name" checked> Company Name</label>
+                        <label style="display:block;"><input type="checkbox" name="columns" value="title" checked> Title</label>
+                        <label style="display:block;"><input type="checkbox" name="columns" value="status" checked> Status</label>
+                        <label style="display:block;"><input type="checkbox" name="columns" value="date_applied" checked> Date Applied</label>
+                        <label style="display:block;"><input type="checkbox" name="columns" value="notes" checked> Notes</label>
+                        </fieldset>
+                        <fieldset>
+                        <legend>Status</legend>
+                        <label style="display:block;"><input type="checkbox" name="status" value="Applied"> Applied</label>
+                        <label style="display:block;"><input type="checkbox" name="status" value="Interview"> Interview</label>
+                        <label style="display:block;"><input type="checkbox" name="status" value="Rejected"> Rejected</label>
+                        <label style="display:block;"><input type="checkbox" name="status" value="Offer"> Offer</label>
+                        </fieldset>
+                        <fieldset>
+                        <legend>Date Applied</legend>
+                        <label style="display:block;" for="filter_date_from">From:</label>
+                        <input type="date" id="filter_date_from" name="filter_date_from" style="display:block; margin-bottom:10px;">
+                        <label style="display:block;" for="filter_date_to">To:</label>
+                        <input type="date" id="filter_date_to" name="filter_date_to" style="display:block; margin-bottom:10px;">
+                        </fieldset>
+                        <div style="margin-top: 15px;">
+                        <button type="submit" class="apply-filter">Apply Filter</button>
+                        <button type="button" class="reset-filter">Reset Filter</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+  
         </div>
 
         <div class="table-container">
