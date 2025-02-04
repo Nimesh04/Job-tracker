@@ -30,26 +30,37 @@
         
         <div class="sign-up-form">
             <h2 class="signup-title">SIGN UP</h2>
-                <form method="POST" action="{{ url_for('register_users') }}">
-                    <label for="signup-username">Username</label>
-                    <input type="text" id="signup-username" class="input-field" name="username" required>
-
-                    <label for="signup-email">Email</label>
-                    <input type="email" id="signup-email" class="input-field" name="email" required>
-
-                    <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" class="input-field" name="password" required>
-
-                    <label for="signup-confirm-password">Confirm Password</label>
-                    <input type="password" id="signup-confirm-password" class="input-field" name="confirm_password" required> 
-
-                    <div class="signup-btn-container">
-                        <button type="submit" class="signup-btn"> SIGN UP</button>
+            <form method="POST" action="{{ url_for('register_users') }}">
+                <div class="name-fields">
+                    <div class="name-field">
+                        <label for="fName">First Name</label>
+                        <input type="text" id="fName" class="input-field" name="fName" required>
                     </div>
-                </form>
-                <form method="GET" action="/login_page">
-                    <button type="submit" class="login-btn"> LOGIN</button>
-                </form>
+                    <div class="name-field">
+                        <label for="lName">Last Name</label>
+                        <input type="text" id="lName" class="input-field" name="lName" required>
+                    </div>
+                </div>
+            
+                <label for="signup-username">Username</label>
+                <input type="text" id="signup-username" class="input-field" name="username" required>
+            
+                <label for="signup-email">Email</label>
+                <input type="email" id="signup-email" class="input-field" name="email" required>
+            
+                <label for="signup-password">Password</label>
+                <input type="password" id="signup-password" class="input-field" name="password" required>
+            
+                <label for="signup-confirm-password">Confirm Password</label>
+                <input type="password" id="signup-confirm-password" class="input-field" name="confirm_password" required> 
+            
+                <div class="signup-btn-container">
+                    <button type="submit" class="signup-btn"> SIGN UP</button>
+                </div>
+            </form>            
+            <form method="GET" action="/login_page">
+                <button type="submit" class="login-btn"> LOGIN</button>
+            </form>
         </div>
     </body>
 </html>

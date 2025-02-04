@@ -22,9 +22,11 @@ status_bar = ['Applied', 'Rejected', 'Interview', 'Offer']
 
 # Define a User class for Flask-Login
 class User(UserMixin):
-    def __init__(self, id, username, email, password):
+    def __init__(self, id, username, fName, lName, email, password):
         self.id = id
         self.username = username
+        self.fName = fName
+        self.lName = lName
         self.email = email
         self.password = password
 
@@ -33,7 +35,7 @@ class User(UserMixin):
 def load_user(user_id):
     with sqlite3.connect("job_tracker.db") as connection:
         cursor = connection.cursor()
-        cursor.execute("SELECT id, username, email, password FROM users WHERE id = ?", (user_id,))
+        cursor.execute("SELECT id, username, fName, lName, email, password FROM users WHERE id = ?", (user_id,))
         user = cursor.fetchone()
         if user is None:
             return None
@@ -44,15 +46,15 @@ def create_tables():
     connection = sqlite3.connect("job_tracker.db")
     connection.execute("PRAGMA foreign_keys = ON")
     cursor = connection.cursor()
-
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
+            fName TEXT NOT NULL,
+            lName TEXT NOT NULL,
             email TEXT NOT NULL,
             password TEXT NOT NULL)
     ''')
-
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS job_applications(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,7 +66,6 @@ def create_tables():
             notes TEXT,
             FOREIGN KEY (user_id) REFERENCES users (id))
     ''')
-
     connection.commit()
     connection.close()
 
@@ -80,7 +81,7 @@ def sign_up():
 def login_page():
     return render_template("login_page.html")
 
-# Protect the dashboard using Flask-Login's decorator
+# Dashboard view (protected)
 @app.route("/dashboard")
 @login_required
 def dashboard():
@@ -91,9 +92,11 @@ def dashboard():
         results = cursor.fetchall()
     return render_template("dashboard.html", results=results)
 
-# Register a new user
+# Register a new user (includes first and last names)
 @app.route("/register_users", methods=["POST"])
 def register_users():
+    fName = request.form["fName"]
+    lName = request.form["lName"]
     username = request.form["username"]
     email = request.form["email"]
     password = request.form["password"]
@@ -117,8 +120,8 @@ def register_users():
                 flash("Username or email already exists", "error")
                 return redirect(url_for("sign_up"))
             
-            cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                           (username, email, hashed_password))
+            cursor.execute("INSERT INTO users (fName, lName, username, email, password) VALUES (?,?,?,?,?)",
+                           (fName, lName, username, email, hashed_password))
             connection.commit()
             flash("Registration successful! Please log in.", "success")
             return redirect(url_for("login_page"))
@@ -136,15 +139,16 @@ def login():
         cursor = connection.cursor()
         cursor.execute("SELECT id, password, username, email FROM users WHERE username = ?", (username,))
         result = cursor.fetchone()
-
         if not result:
             flash("Invalid username or password.", "error")
             return redirect(url_for("login_page"))
-
         user_id, stored_password, user_name, user_email = result
         if bcrypt.checkpw(password.encode("utf-8"), stored_password.encode("utf-8")):
-            user = User(user_id, user_name, user_email, stored_password)
-            login_user(user)  # Manage the user session with Flask-Login
+            # Retrieve all user details
+            cursor.execute("SELECT id, username, fName, lName, email, password FROM users WHERE username = ?", (username,))
+            user_data = cursor.fetchone()
+            user = User(*user_data)
+            login_user(user)
             flash("Login successful!", "success")
             return redirect(url_for("dashboard"))
         else:
@@ -155,7 +159,7 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
-    logout_user()  # Flask-Login handles session cleanup
+    logout_user()
     flash("You have been logged out.", "success")
     return redirect(url_for('login_page'))
 
@@ -175,7 +179,6 @@ def add_job():
         return jsonify({"success": False, "message": "All fields are required!"})
     
     try:
-        # Convert the date string into a date object
         date = datetime.strptime(date_applied, '%Y-%m-%d').date()
         with sqlite3.connect('job_tracker.db') as connection:
             cursor = connection.cursor()
@@ -188,21 +191,18 @@ def add_job():
     except sqlite3.IntegrityError as e:
         return jsonify({"success": False, "message": str(e)})
 
-# Helper: check if a user exists
 def user_exists(user_id):
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
         cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
         return cursor.fetchone() is not None
 
-# Helper: check if job application ID exists
 def valid_id(job_id):
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
         cursor.execute('SELECT id FROM job_applications WHERE id = ?', (job_id,))
         return cursor.fetchone() is not None
 
-# Delete jobs endpoint (requires login)
 @app.route('/delete-job', methods=["POST"])
 @login_required
 def delete_jobs():
@@ -221,7 +221,6 @@ def delete_jobs():
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
 
-# Update job application status
 def update_status(user_id, job_id, new_status):
     try:
         if not valid_id(job_id):
@@ -240,13 +239,26 @@ def update_status(user_id, job_id, new_status):
     except sqlite3.IntegrityError as e:
         return "Use valid status"
 
-# Delete user account (helper function)
-def delete_users(username, id):
+def delete_users(username, user_id):
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
-        cursor.execute('DELETE FROM users WHERE username = ? and id = ?', (username, id))
+        cursor.execute('DELETE FROM users WHERE username = ? AND id = ?', (username, user_id))
+        connection.commit()
 
-# Search for job applications
+@app.route("/delete_account", methods=["POST"])
+@login_required
+def delete_account():
+    try:
+        with sqlite3.connect('job_tracker.db') as connection:
+            cursor = connection.cursor()
+            cursor.execute('DELETE FROM users WHERE id = ?', (current_user.id,))
+            connection.commit()
+        logout_user()
+        flash("Your account has been deleted.", "success")
+        return jsonify({"success": True, "redirect": url_for("sign_up")})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
+
 @app.route("/search", methods=["POST"])
 @login_required
 def search():
@@ -273,12 +285,11 @@ def search():
         })
     return jsonify({"success": True, "results": jobs})
 
-
 @app.route("/advanced_filter", methods=["POST"])
 @login_required
 def advanced_filter():
     data = request.get_json()
-    statuses = data.get("status", [])   # Expecting a list of statuses
+    statuses = data.get("status", [])
     date_from = data.get("date_from", None)
     date_to = data.get("date_to", None)
     
@@ -286,7 +297,6 @@ def advanced_filter():
     params = [current_user.id]
     
     if statuses:
-        # Build an IN clause with the selected statuses
         placeholders = ','.join('?' * len(statuses))
         query += f" AND status COLLATE NOCASE IN ({placeholders})"
         params.extend(statuses)
@@ -317,8 +327,6 @@ def advanced_filter():
         })
     
     return jsonify({"success": True, "results": jobs})
-
-
 
 if __name__ == "__main__":
     create_tables()

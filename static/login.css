@@ -69,8 +69,9 @@ form label{
     margin-bottom: 10px;
     box-shadow: 1px 5px 6px rgb(0,0,0,0.5);
     border: 1px solid #ccc;
-    border-radius: 24px;
+    border-radius: 8px;
     padding: 8px;
+    outline: none;
     transition: border 0.3s ease-in-out;
 }
 
