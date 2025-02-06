@@ -6,6 +6,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const jobForm = document.getElementById("jobForm");
     const tableContent = document.querySelector(".table-content");
 
+    //Element for delete job modal
+    const deleteJob = document.getElementById("delete-button");
+
+    //elements for search modal
+    const searchBar = document.querySelector('.search-bar');
+    const searchButton = document.querySelector('.icon-button img[alt="Search"]').parentElement;
+
     // Elements for Filter Modal
     const filterModal = document.getElementById("filter_modal");
     const openFilterModalBtn = document.querySelector('.icon-button img[alt="Filter"]').parentElement;
@@ -121,6 +128,91 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             })
             .catch(error => console.error("Error:", error));
+        });
+    }
+
+
+    //delete jobs
+    // Handle the job delete part
+    document.addEventListener("click", (event) => {
+        if (event.target.classList.contains("checkbox")) {
+            const checkBoxes = document.querySelectorAll(".checkbox");
+            const anyChecked = [...checkBoxes].some(cb => cb.checked);
+            
+            if(anyChecked){
+                deleteJob.classList.add("show");
+            }else{
+                deleteJob.classList.remove("show");
+            }
+        }
+    });
+
+    deleteJob.addEventListener("click", () => {
+        const checkedRows = document.querySelectorAll(".checkbox:checked");
+        if (checkedRows.length === 0) return;
+
+        if (!confirm("Are you sure you want to delete the selected jobs?")) return;
+
+        const jobIds = [...checkedRows].map(cb => cb.closest(".table-row").dataset.id);
+
+        // Send request to Flask backend to delete jobs
+        fetch("/delete-job", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ job_ids: jobIds }) // Send array of IDs
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove deleted rows from UI
+                checkedRows.forEach(cb => cb.closest(".table-row").remove());
+                deleteJob.classList.remove("show"); // Hide button after delete
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+
+    //Search function
+    if(searchButton && searchBar){
+        searchButton.addEventListener('click', ()=>{
+            const query = searchBar.value.trim();
+            fetch('/search', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({query: query})
+            })
+            .then(response => response.json())
+            .then(data => {
+                tableContent.innerHTML ='';
+                if(data.success){
+                    if (data.results.length > 0){
+                        data.results.forEach(job => {
+                            const newRow = document.createElement('div');
+                            newRow.classList.add('table-row');
+                            newRow.dataset.id = job.id;
+                            newRow.innerHTML = `
+                                <input type="checkbox">
+                                <span>${job.company_name}</span>
+                                <span>${job.title}</span>
+                                <span>${job.status}</span>
+                                <span>${job.date_applied}</span>
+                                <span>${job.notes}</span>
+                            `;
+                            tableContent.appendChild(newRow);
+                        });
+                    } else {
+                        const noResultRow = document.createElement('div');
+                        noResultRow.classList.add('table-row');
+                        noResultRow.innerHTML = `<span colspan="5"> No result found</span>`;
+                        tableContent.appendChild(noResultRow);
+                    }
+                }else{
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => console.error("Error:", error))
         });
     }
 
