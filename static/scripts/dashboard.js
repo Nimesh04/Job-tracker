@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const openFilterModalBtn = document.querySelector('.icon-button img[alt="Filter"]').parentElement;
     const closeFilterModalBtn = document.getElementById("filter_close");
     const filterForm = document.getElementById("filterForm");
+    const applyFilterBtn = document.querySelector(".apply-filter");
     const resetFilterBtn = document.querySelector(".reset-filter");
 
     // Profile Dropdown
@@ -32,30 +33,26 @@ document.addEventListener("DOMContentLoaded", () => {
     jobModal.style.display = "none";
     filterModal.style.display = "none";
 
-    // Function to show modal properly
     function showModal(modal) {
         modal.style.display = "flex";
         modal.style.visibility = "visible";
         modal.style.opacity = "1";
-        modal.style.justifyContent = "center"; // Ensures centering
-        modal.style.alignItems = "center"; // Ensures centering
+        modal.style.justifyContent = "center";
+        modal.style.alignItems = "center";
     }
 
-    // Function to hide modal
     function hideModal(modal) {
         modal.style.display = "none";
         modal.style.visibility = "hidden";
         modal.style.opacity = "0";
     }
 
-    // Open Add Job Modal
     if (openJobModalBtn) {
         openJobModalBtn.addEventListener("click", () => {
             showModal(jobModal);
         });
     }
 
-    // Close Add Job Modal
     closeJobModalBtns.forEach(btn => {
         btn.addEventListener("click", () => {
             hideModal(jobModal);
@@ -68,14 +65,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Open Filter Modal
     if (openFilterModalBtn) {
         openFilterModalBtn.addEventListener("click", () => {
             showModal(filterModal);
         });
     }
 
-    // Close Filter Modal
     if (closeFilterModalBtn) {
         closeFilterModalBtn.addEventListener("click", () => {
             hideModal(filterModal);
@@ -88,12 +83,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Handle Job Form Submission
     if (jobForm) {
         jobForm.addEventListener("submit", (event) => {
             event.preventDefault();
-
-            // Get form values
             const formData = new FormData(jobForm);
             const jobData = {
                 company: formData.get("company"),
@@ -103,7 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 notes: formData.get("notes")
             };
 
-            // Send data to Flask using Fetch API
             fetch("/add_job", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -122,9 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span>${jobData.date_applied}</span>
                         <span>${jobData.notes}</span>
                     `;
-                    tableContent.prepend(newRow); 
-
-                    // Close modal & reset form
+                    tableContent.prepend(newRow);
                     hideModal(jobModal);
                     jobForm.reset();
                 } else {
@@ -135,86 +124,92 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Handle Delete Job
-    const deleteJobButton = document.getElementById("delete-button");
+    applyFilterBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        
+        const selectedColumns = [...document.querySelectorAll("input[name='columns']:checked")].map(checkbox => checkbox.value);
+        const selectedStatuses = [...document.querySelectorAll("input[name='status']:checked")].map(checkbox => checkbox.value);
+        const dateFrom = document.getElementById("filter_date_from").value;
+        const dateTo = document.getElementById("filter_date_to").value;
 
-    document.addEventListener("click", (event) => {
-        if (event.target.classList.contains("checkbox")) {
-            const checkBoxes = document.querySelectorAll(".checkbox");
-            const anyChecked = [...checkBoxes].some(cb => cb.checked);
-            deleteJobButton.classList.toggle("show", anyChecked);
-        }
+        fetch("/advanced_filter", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                status: selectedStatuses,
+                date_from: dateFrom,
+                date_to: dateTo
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            tableContent.innerHTML = "";
+            if (data.success) {
+                if (data.results.length > 0) {
+                    data.results.forEach(job => {
+                        const newRow = document.createElement("div");
+                        newRow.classList.add("table-row");
+                        newRow.dataset.id = job.id;
+
+                        let rowContent = `<input type="checkbox" class="checkbox">`;
+                        if (selectedColumns.includes("company_name")) rowContent += `<span>${job.company_name}</span>`;
+                        if (selectedColumns.includes("title")) rowContent += `<span>${job.title}</span>`;
+                        if (selectedColumns.includes("status")) rowContent += `<span>${job.status}</span>`;
+                        if (selectedColumns.includes("date_applied")) rowContent += `<span>${job.date_applied}</span>`;
+                        if (selectedColumns.includes("notes")) rowContent += `<span>${job.notes}</span>`;
+
+                        newRow.innerHTML = rowContent;
+                        tableContent.appendChild(newRow);
+                    });
+                } else {
+                    const noResultRow = document.createElement("div");
+                    noResultRow.classList.add("table-row");
+                    noResultRow.innerHTML = '<span colspan="5">No result found</span>';
+                    tableContent.appendChild(noResultRow);
+                }
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+
+        hideModal(filterModal);
     });
 
-    if (deleteJobButton) {
-        deleteJobButton.addEventListener("click", () => {
-            const checkedRows = document.querySelectorAll(".checkbox:checked");
-            if (checkedRows.length === 0) return;
-            if (!confirm("Are you sure you want to delete the selected jobs?")) return;
+    // Reset Filter Functionality
+    resetFilterBtn.addEventListener("click", () => {
+        filterForm.reset();
+        fetch("/advanced_filter", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                status: [],
+                date_from: "",
+                date_to: ""
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            tableContent.innerHTML = "";
+            if (data.success) {
+                data.results.forEach(job => {
+                    const newRow = document.createElement("div");
+                    newRow.classList.add("table-row");
+                    newRow.dataset.id = job.id;
+                    newRow.innerHTML = `
+                        <input type="checkbox" class="checkbox">
+                        <span>${job.company_name}</span>
+                        <span>${job.title}</span>
+                        <span>${job.status}</span>
+                        <span>${job.date_applied}</span>
+                        <span>${job.notes}</span>
+                    `;
+                    tableContent.appendChild(newRow);
+                });
+            }
+        })
+        .catch(error => console.error("Error:", error));
 
-            const jobIds = [...checkedRows].map(cb => cb.closest(".table-row").dataset.id);
-
-            fetch("/delete-job", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ job_ids: jobIds })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    checkedRows.forEach(cb => cb.closest(".table-row").remove());
-                    deleteJobButton.classList.remove("show");
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        });
-    }
-
-    // Handle Reset Filters
-    if (resetFilterBtn) {
-        resetFilterBtn.addEventListener("click", () => {
-            filterForm.reset();
-            fetch("/advanced_filter", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    status: [],
-                    date_from: "",
-                    date_to: ""
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                tableContent.innerHTML = "";
-                if (data.success) {
-                    if (data.results.length > 0) {
-                        data.results.forEach(job => {
-                            const newRow = document.createElement("div");
-                            newRow.classList.add("table-row");
-                            newRow.dataset.id = job.id;
-                            newRow.innerHTML = `
-                                <input type="checkbox" class="checkbox">
-                                <span class="company_name">${job.company_name}</span>
-                                <span class="job-title">${job.title}</span>
-                                <span class="status">${job.status}</span>
-                                <span class="date_applied">${job.date_applied}</span>
-                                <span class="notes">${job.notes}</span>
-                            `;
-                            tableContent.appendChild(newRow);
-                        });
-                    } else {
-                        const noResultRow = document.createElement("div");
-                        noResultRow.classList.add("table-row");
-                        noResultRow.innerHTML = '<span colspan="5">No result found</span>';
-                        tableContent.appendChild(noResultRow);
-                    }
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(error => console.error("Error:", error));
-        });
-    }
+        hideModal(filterModal);
+    });
 });

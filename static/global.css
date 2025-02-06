@@ -278,7 +278,8 @@ body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    overflow-y: auto; /* Enables internal scrolling if needed */
+    overflow-y: auto; 
+    overflow-x: auto;
 }
 
 /* LABELS */
@@ -297,7 +298,6 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-bottom: 10px;
-    width: 100%;
     outline: none;
 }
 
@@ -344,8 +344,39 @@ body {
     background-color: #d32f2f;
 }
 
+.apply-filter, .reset-filter {
+    flex: 1;
+    padding: 8px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
 
+.apply-filter {
+    background-color: #4CAF50;
+    color: white;
+}
 
+.apply-filter:hover {
+    background-color: #45a049;
+}
+
+.reset-filter {
+    background-color: #f44336;
+    color: white;
+}
+
+.reset-filter:hover {
+    background-color: #d32f2f;
+}
+
+.filter-div{
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
 
 .flash-container {
     margin: 20px 0;
