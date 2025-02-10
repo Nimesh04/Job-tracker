@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Elements for Filter Modal
     const filterModal = document.getElementById("filter_modal");
+    const columnToDisplay = document.getElementById("columns-to-display");
     const openFilterModalBtn = document.querySelector('.icon-button img[alt="Filter"]').parentElement;
     const closeFilterModalBtn = document.getElementById("filter_close");
     const filterForm = document.getElementById("filterForm");
@@ -75,6 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (openFilterModalBtn) {
         openFilterModalBtn.addEventListener("click", () => {
             showModal(filterModal);
+            hideModal(columnToDisplay);
+
         });
     }
 
@@ -97,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const jobData = {
                 company: formData.get("company"),
                 title: formData.get("title"),
+                link: formData.get("link"),
                 status: formData.get("status"),
                 date_applied: formData.get("date_applied"),
                 notes: formData.get("notes")
@@ -109,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data.success) { 
                     const newRow = document.createElement("div");
                     newRow.classList.add("table-row");
                     newRow.innerHTML = `

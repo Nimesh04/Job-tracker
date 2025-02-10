@@ -48,6 +48,9 @@
                             <option value="Rejected">Rejected</option>
                             <option value="Offer">Offer</option>
                         </select>
+
+                        <label for="link">Link</label>
+                        <input type="url" id="link" name="link" required>
                 
                         <label for="date_applied">Date Applied</label>
                         <input type="date" id="date_applied" name="date_applied" required>
@@ -72,7 +75,7 @@
                     <span class="close" id="filter_close">&times;</span>
                     <h2>Filter</h2>
                     <form id="filterForm">
-                        <fieldset>
+                        <fieldset id="columns-to-display">
                             <legend>Columns to Display</legend>
                             <label style="display:block;"><input type="checkbox" name="columns" value="company_name" checked> Company Name</label>
                             <label style="display:block;"><input type="checkbox" name="columns" value="title" checked> Title</label>
@@ -118,10 +121,10 @@
                 <div class="table-row" data-id="{{ result[0] }}">
                     <input type="checkbox" class="checkbox">
                     <span>{{ result[3] }}</span> <!-- Company Name -->
-                    <span>{{ result[2] }}</span> <!-- Title -->
-                    <span>{{ result[5] }}</span> <!-- Status -->
-                    <span>{{ result[4] }}</span> <!-- Date Applied -->
-                    <span>{{ result[6] }}</span> <!-- Notes -->
+                    <span>{{ result[2] }} <a href=" {{ result[4] }}" target="_blank">[-] </a> </span> <!-- Title -->
+                    <span>{{ result[6] }}</span> <!-- Status -->
+                    <span>{{ result[5] }}</span> <!-- Date Applied -->
+                    <span>{{ result[7] }}</span> <!-- Notes -->
                 </div>
                 {% else %}
                 <div class="table-row">

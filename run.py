@@ -61,6 +61,7 @@ def create_tables():
             user_id INTEGER NOT NULL,
             title TEXT NOT NULL,
             company_name TEXT NOT NULL,
+            link TEXT NOT NULL,
             date_applied TEXT NOT NULL,
             status TEXT NOT NULL,
             notes TEXT,
@@ -172,6 +173,7 @@ def add_job():
     company = data.get("company")
     title = data.get("title")
     status = data.get("status")
+    link = data.get("link")
     date_applied = data.get("date_applied")
     notes = data.get("notes")
 
@@ -183,9 +185,9 @@ def add_job():
         with sqlite3.connect('job_tracker.db') as connection:
             cursor = connection.cursor()
             cursor.execute('''
-                INSERT INTO job_applications (user_id, title, company_name, date_applied, status, notes)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (user_id, title, company, date, status, notes))
+                INSERT INTO job_applications (user_id, title, company_name,link, date_applied, status, notes)
+                VALUES (?, ?, ?,?, ?, ?, ?)
+            ''', (user_id, title, company, link, date, status, notes))
             connection.commit()
         return jsonify({"success": True, "message": "Job added successfully!"})
     except sqlite3.IntegrityError as e:
@@ -279,9 +281,10 @@ def search():
             "user_id": row[1],
             "title": row[2],
             "company_name": row[3],
-            "date_applied": row[4],
-            "status": row[5],
-            "notes": row[6]
+            "link": row[4],
+            "date_applied": row[5],
+            "status": row[6],
+            "notes": row[7]
         })
     return jsonify({"success": True, "results": jobs})
 
@@ -321,9 +324,10 @@ def advanced_filter():
             "user_id": row[1],
             "title": row[2],
             "company_name": row[3],
-            "date_applied": row[4],
-            "status": row[5],
-            "notes": row[6]
+            "link": row[4],
+            "date_applied": row[5],
+            "status": row[6],
+            "notes": row[7]
         })
     
     return jsonify({"success": True, "results": jobs})
