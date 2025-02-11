@@ -222,24 +222,30 @@ def delete_jobs():
         return jsonify({"success": False, "message": "Invalid job ID(s) provided."})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
+    
 
-def update_status(user_id, job_id, new_status):
-    try:
-        if not valid_id(job_id):
-            raise ValueError(f"{job_id} is an invalid ID.")
-        if not user_exists(user_id):
-            raise ValueError(f"{user_id} doesn't exist")
-        if new_status not in status_bar:
-            raise ValueError("Invalid status")
-        with sqlite3.connect('job_tracker.db') as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                UPDATE job_applications
-                SET status = ?
-                WHERE user_id = ? AND id = ?
-            ''', (new_status, user_id, job_id))
-    except sqlite3.IntegrityError as e:
-        return "Use valid status"
+@app.route("/update_job_status", methods=["POST"])
+@login_required
+def update_status():
+    data = request.get_json()
+    job_id = data.get("job_id")
+    new_status = data.get("new_status")
+
+    print("Received data:", data)
+
+    if not job_id or not new_status:
+        return jsonify({"success": False, "message": "Invalid request parameters."})
+    
+    with sqlite3.connect("job_tracker.db") as connection:
+        cursor = connection.cursor()
+        cursor.execute("""
+            UPDATE job_applications
+                       SET status = ?
+                       WHERE id = ? AND user_id = ?
+                       """, (new_status, job_id, current_user.id))
+        connection.commit()
+
+    return jsonify({"success": True, "message": "Status updated successfully!"})
 
 def delete_users(username, user_id):
     with sqlite3.connect('job_tracker.db') as connection:

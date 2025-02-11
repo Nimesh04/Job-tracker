@@ -26,6 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileButton = document.getElementById("profile_button");
     const profileSection = document.getElementById("profile_section");
 
+    const loginForm = document.querySelector("form[action*='login']");
+    const signupForm = document.querySelector("form[action*='register_users']");
+    
     profileButton.addEventListener("click", (event) => {
         event.stopPropagation();
         profileSection.classList.toggle("show");
@@ -36,6 +39,13 @@ document.addEventListener("DOMContentLoaded", () => {
             profileSection.classList.remove("show");
         }
     });
+
+    setTimeout(() => {
+        document.querySelectorAll(".flash-messages li").forEach(msg => {
+            msg.style.animation = "fadeOut 1s forwards";
+            setTimeout(() => msg.remove(), 1000);
+        });
+    }, 3000);
 
     // Ensure modals are hidden on load
     jobModal.style.display = "none";
@@ -55,6 +65,115 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.style.opacity = "0";
     }
 
+    function updateJobStatus(jobId, newStatus, dropdown) {
+        console.log("Updating job ID:", jobId, "to status:", newStatus); 
+        fetch("/update_job_status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ job_id: jobId, new_status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(!data.success){
+                alert("Error updating status: "+ data.message);
+                dropdown.value = dropdown. dataset.previousValue;
+            } else {
+                dropdown.dataset.previousValue = newStatus;
+            }
+        })
+        .catch(error => {
+            console.error("Error: ", error);
+            alert("Failed to update status. Try again.");
+            dropdown.value =  dropdown.dataset.previousValue; 
+        });
+    }
+
+    function showError(input, message) {
+        let errorElement = input.nextElementSibling;
+        if (!errorElement || !errorElement.classList.contains("error-message")) {
+            errorElement = document.createElement("div");
+            errorElement.classList.add("error-message");
+            errorElement.style.color = "red";
+            errorElement.style.marginTop = "5px";
+            input.parentNode.insertBefore(errorElement, input.nextSibling);
+        }
+        errorElement.innerText = message;
+    }
+
+    function clearErrors(form) {
+        form.querySelectorAll(".error-message").forEach(error => error.remove());
+    }
+
+
+    tableContent.addEventListener("change", (event) => {
+        if(event.target.classList.contains("status-dropdown")) {
+            const dropdown = event.target;
+            const jobRow = dropdown.closest(".table-row");
+            const jobId = jobRow ? jobRow.dataset.id : null;
+            const newStatus = dropdown.value;
+            
+            if(!jobId){
+                alert("Error: Job ID not found.");
+                return;
+            }
+            updateJobStatus(jobId, newStatus, dropdown);
+        }
+    });
+
+
+    if (loginForm) {
+        loginForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            clearErrors(loginForm);
+            const username = document.getElementById("username");
+            const password = document.getElementById("password");
+            let isValid = true;
+
+            if (username.value.trim() === "") {
+                showError(username, "Username is required.");
+                isValid = false;
+            }
+            if (password.value.trim() === "") {
+                showError(password, "Password is required.");
+                isValid = false;
+            }
+
+            if (isValid) loginForm.submit();
+        });
+    }
+
+    if (signupForm) {
+        signupForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            clearErrors(signupForm);
+            const username = document.getElementById("signup-username");
+            const email = document.getElementById("signup-email");
+            const password = document.getElementById("signup-password");
+            const confirmPassword = document.getElementById("signup-confirm-password");
+            let isValid = true;
+
+            if (username.value.trim() === "") {
+                showError(username, "Username is required.");
+                isValid = false;
+            }
+            if (email.value.trim() === "" || !email.value.includes("@")) {
+                showError(email, "Enter a valid email address.");
+                isValid = false;
+            }
+            if (password.value.length < 6) {
+                showError(password, "Password must be at least 6 characters.");
+                isValid = false;
+            }
+            if (password.value !== confirmPassword.value) {
+                showError(confirmPassword, "Passwords do not match.");
+                isValid = false;
+            }
+
+            if (isValid) signupForm.submit();
+        });
+    }
+
+    
     if (openJobModalBtn) {
         openJobModalBtn.addEventListener("click", () => {
             showModal(jobModal);
@@ -117,10 +236,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     const newRow = document.createElement("div");
                     newRow.classList.add("table-row");
                     newRow.innerHTML = `
-                        <input type="checkbox">
+                        <input type="checkbox" class="checkbox">
                         <span>${jobData.company}</span>
-                        <span>${jobData.title}</span>
-                        <span>${jobData.status}</span>
+                        <span>${jobData.title} <a href="${jobData.link}" target="_blank">[-]</a></span>
+                        <select class="status-dropdown" data-previous-value="${jobData.status}">
+                            <option value="Applied" ${jobData.status === 'Applied' ? 'selected="selected"' : ''}>Applied</option>
+                            <option value="Interview" ${jobData.status === 'Interview' ? 'selected' : ''}>Interview</option>
+                            <option value="Offer" ${jobData.status === 'Offer' ? 'selected' : ''}>Offer</option>
+                            <option value="Rejected" ${jobData.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                        </select>
                         <span>${jobData.date_applied}</span>
                         <span>${jobData.notes}</span>
                     `;
@@ -197,12 +321,17 @@ document.addEventListener("DOMContentLoaded", () => {
                             newRow.classList.add('table-row');
                             newRow.dataset.id = job.id;
                             newRow.innerHTML = `
-                                <input type="checkbox">
-                                <span>${job.company_name}</span>
-                                <span>${job.title}</span>
-                                <span>${job.status}</span>
-                                <span>${job.date_applied}</span>
-                                <span>${job.notes}</span>
+                                <input type="checkbox" class="checkbox">
+                                <span>${jobData.company}</span>
+                                <span>${jobData.title} <a href="${jobData.link}" target="_blank">[-]</a></span>
+                                <select class="status-dropdown" data-previous-value="${jobData.status}">
+                                    <option value="Applied" ${jobData.status === 'Applied' ? 'selected="selected"' : ''}>Applied</option>
+                                    <option value="Interview" ${jobData.status === 'Interview' ? 'selected' : ''}>Interview</option>
+                                    <option value="Offer" ${jobData.status === 'Offer' ? 'selected' : ''}>Offer</option>
+                                    <option value="Rejected" ${jobData.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                                </select>
+                                <span>${jobData.date_applied}</span>
+                                <span>${jobData.notes}</span>
                             `;
                             tableContent.appendChild(newRow);
                         });
@@ -308,4 +437,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
         hideModal(filterModal);
     });
+
 });

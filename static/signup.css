@@ -159,3 +159,64 @@ form label{
     color: #155724;
     border: 1px solid #c3e6cb;
 }
+
+.error-message {
+    color: #d9534f;
+    font-size: 14px;
+    margin-top: 5px;
+    display: none;
+}
+
+.input-field.error {
+    border-color: #d9534f;
+    box-shadow: 0 0 5px rgba(217, 83, 79, 0.75);
+}
+
+
+.flash-container {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    max-width: 500px;
+    z-index: 1000;
+}
+
+.flash-messages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.flash-messages li {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 16px;
+    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2);
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.flash-messages .error {
+    background-color: #ffcccc;
+    color: #b30000;
+    border: 1px solid #ff9999;
+}
+
+.flash-messages .success {
+    background-color: #ccffcc;
+    color: #006600;
+    border: 1px solid #99ff99;
+}
+
+/* Animation for flash messages */
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}

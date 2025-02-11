@@ -121,8 +121,13 @@
                 <div class="table-row" data-id="{{ result[0] }}">
                     <input type="checkbox" class="checkbox">
                     <span>{{ result[3] }}</span> <!-- Company Name -->
-                    <span>{{ result[2] }} <a href=" {{ result[4] }}" target="_blank">[-] </a> </span> <!-- Title -->
-                    <span>{{ result[6] }}</span> <!-- Status -->
+                    <span>{{ result[2] }} <a href="{{ result[4] |e }}" target="_blank">&lbrack;-&rbrack; </a> </span> <!-- Title -->
+                    <select class="status-dropdown" data-previous-value="{{ result[6] }}">
+                        <option value="Applied" {% if result[6] == 'Applied' %}selected="selected"{% endif %}>Applied</option> 
+                        <option value="Interview" {% if result[6] == 'Interview' %} selected {% endif %}>Interview</option>
+                        <option value="Offer" {% if result[6] == 'Offer' %} selected {% endif %}>Offer</option>
+                        <option value="Rejected" {% if result[6] == 'Rejected' %} selected {% endif %}>Rejected</option>
+                    </select>
                     <span>{{ result[5] }}</span> <!-- Date Applied -->
                     <span>{{ result[7] }}</span> <!-- Notes -->
                 </div>

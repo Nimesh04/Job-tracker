@@ -18,20 +18,22 @@
                     <img class="logo-bg" src="{{ url_for('static', filename='Images/J-removebg.png') }}">
                     <h1 class="title">Job tracker</h1>
                 </head>
-                    <form method="POST" action="{{ url_for('login')}}">
-                            <label for="username">Username</label>
-                            <input type="text" id="username" class="input-field" placeholder="Enter your username" name="username" >
-    
-                            <label for="password">Password</label>
-                            <input type="password" id="password" class="input-field" placeholder="Enter your password" name="password">
-    
-                            <div class="btn-container">
-                                <button type="submit" class="login-btn">LOGIN</button>
-                            </div>
-                    </form>
-                    <form method="GET" action="/sign_up">
-                        <button type="submit" class="signup-btn">SIGN UP</button>
-                    </form>
+                <form method="POST" action="{{ url_for('login')}}" id="loginForm">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="input-field" placeholder="Enter your username" name="username">
+                    <div class="error-message" id="username-error"></div>
+                
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="input-field" placeholder="Enter your password" name="password">
+                    <div class="error-message" id="password-error"></div>
+                
+                    <div class="btn-container">
+                        <button type="submit" class="login-btn">LOGIN <img src="{{ url_for('static', filename='/Images/right-arrow.png') }}" class="right-arrow-png"></button>
+                    </div>
+                </form>                
+                <form method="GET" action="/sign_up">
+                    <button type="submit" class="signup-btn">SIGN UP</button>
+                </form>
             </div>  
         </div>
     </body>
