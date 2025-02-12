@@ -85,7 +85,7 @@ def home():
 @app.route("/sign_up")
 def sign_up():
     flash_message = session.pop("flash_message", None)
-    return render_template("sign_up.html", flash_message=flash_message)
+    return render_template("Sign_up.html", flash_message=flash_message)
 
 
 @app.route("/login_page")
@@ -118,11 +118,11 @@ def register_users():
 
     if not username or not email or not password:
         session["flash_message"]= {"message":"All fields are required!", "category": "error"}
-        return redirect(url_for("sign_up"))
+        return redirect(url_for("Sign_up"))
     
     if password != confirm_password:
         session["flash_message"]= {"message":"Passwords do not match", "category": "error"}
-        return redirect(url_for("sign_up"))
+        return redirect(url_for("Sign_up"))
     
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
@@ -132,7 +132,7 @@ def register_users():
             cursor.execute('SELECT id FROM users WHERE username = ? OR email = ?', (username, email))
             if cursor.fetchone():
                 session["flash_message"]= {"message":"Username or email already exists", "category":"error"}
-                return redirect(url_for("sign_up"))
+                return redirect(url_for("Sign_up"))
             
             cursor.execute("INSERT INTO users (fName, lName, username, email, password) VALUES (?,?,?,?,?)",
                            (fName, lName, username, email, hashed_password))
@@ -141,7 +141,7 @@ def register_users():
             return redirect(url_for("login_page"))
         except sqlite3.IntegrityError as e:
             session["flash_message"]= {"message": "Database constraint error: " + str(e) , "category": "error"} 
-            return redirect(url_for("sign_up"))
+            return redirect(url_for("Sign_up"))
 
 # Login endpoint using Flask-Login's login_user
 @app.route("/login", methods=["POST"])
@@ -280,7 +280,7 @@ def delete_account():
             connection.commit()
         logout_user()
         flash("Your account has been deleted.", "success")
-        return jsonify({"success": True, "redirect": url_for("sign_up")})
+        return jsonify({"success": True, "redirect": url_for("Sign_up")})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
 
