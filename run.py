@@ -10,9 +10,10 @@ from flask_login import (
     logout_user,
     login_required
 )
-import psycopg2
-DATABASE_URL = os.environ.get("DATABASE_URL")
-connection = psycopg2.connect(DATABASE_URL)
+DATABASE_PATH = "/var/data/job_tracker.db"
+
+def get_db_connection():
+    return sqlite3.connect(DATABASE_PATH, check_same_thread=False)
 
 
 app = Flask(__name__)
@@ -47,32 +48,34 @@ def load_user(user_id):
 
 # Create the tables for the database
 def create_tables():
-    connection = sqlite3.connect("job_tracker.db")
-    connection.execute("PRAGMA foreign_keys = ON")
-    cursor = connection.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            fName TEXT NOT NULL,
-            lName TEXT NOT NULL,
-            email TEXT NOT NULL,
-            password TEXT NOT NULL)
-    ''')
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS job_applications(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            title TEXT NOT NULL,
-            company_name TEXT NOT NULL,
-            link TEXT NOT NULL,
-            date_applied TEXT NOT NULL,
-            status TEXT NOT NULL,
-            notes TEXT,
-            FOREIGN KEY (user_id) REFERENCES users (id))
-    ''')
-    connection.commit()
-    connection.close()
+    os.makedirs("/var/data", exist_ok=True)  # Ensure /var/data exists
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                fName TEXT NOT NULL,
+                lName TEXT NOT NULL,
+                email TEXT NOT NULL,
+                password TEXT NOT NULL
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS job_applications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                company_name TEXT NOT NULL,
+                link TEXT NOT NULL,
+                date_applied TEXT NOT NULL,
+                status TEXT NOT NULL,
+                notes TEXT,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        conn.commit()
+
 
 @app.route("/")
 def home():
