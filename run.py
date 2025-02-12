@@ -76,22 +76,27 @@ def home():
 
 @app.route("/sign_up")
 def sign_up():
-    return render_template("sign_up.html")
+    flash_message = session.pop("flash_message", None)
+    return render_template("sign_up.html", flash_message=flash_message)
+
 
 @app.route("/login_page")
 def login_page():
-    return render_template("login_page.html")
+    flash_message = session.pop("flash_message", None)  # Pop message when rendering
+    return render_template("login_page.html", flash_message=flash_message)
 
-# Dashboard view (protected)
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
+    flash_message = session.pop("flash_message", None)
     user_id = current_user.id
     with sqlite3.connect("job_tracker.db") as connection:
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM job_applications WHERE user_id = ?", (user_id,))
         results = cursor.fetchall()
-    return render_template("dashboard.html", results=results)
+    return render_template("dashboard.html", results=results, flash_message=flash_message)
+
 
 # Register a new user (includes first and last names)
 @app.route("/register_users", methods=["POST"])
@@ -140,11 +145,15 @@ def login():
         cursor = connection.cursor()
         cursor.execute("SELECT id, password, username, email FROM users WHERE username = ?", (username,))
         result = cursor.fetchone()
+
         if not result:
             session["flash_message"] = {"message": "Invalid username or password.", "category": "error"}
+            return redirect(url_for("login_page"))  # Redirect back to login with flash message
+
+        # Unpack only if a result exists
         user_id, stored_password, user_name, user_email = result
+
         if bcrypt.checkpw(password.encode("utf-8"), stored_password.encode("utf-8")):
-            # Retrieve all user details
             cursor.execute("SELECT id, username, fName, lName, email, password FROM users WHERE username = ?", (username,))
             user_data = cursor.fetchone()
             user = User(*user_data)
@@ -152,8 +161,9 @@ def login():
             session["flash_message"] = {"message": "Login successful!", "category": "success"}
             return redirect(url_for("dashboard"))
         else:
-            session["flash_message"] = {"message": "Invalid Username or Password", "category": "success"}
-            return redirect(url_for("login_page"))
+            session["flash_message"] = {"message": "Invalid username or password.", "category": "error"}
+            return redirect(url_for("login_page"))  # Redirect with flash message
+
 
 # Logout endpoint
 @app.route('/logout')
@@ -270,15 +280,22 @@ def delete_account():
 @login_required
 def search():
     data = request.get_json()
-    query = data.get("query", "")
+    query = data.get("query", "").strip()
+
+    if not query:
+        return jsonify({"success": False, "message": "Search query is empty."})
+
     user_id = current_user.id
     with sqlite3.connect('job_tracker.db') as connection:
         cursor = connection.cursor()
         cursor.execute("""
-        SELECT * FROM job_applications
-        WHERE user_id = ? AND (company_name LIKE ? OR title LIKE ? OR notes LIKE ?)
-    """, (user_id, f'%{query}%', f'%{query}%', f'%{query}%'))
+            SELECT * FROM job_applications
+            WHERE user_id = ? 
+            AND (company_name LIKE ? OR title LIKE ? OR notes LIKE ?)
+        """, (user_id, f'%{query}%', f'%{query}%', f'%{query}%'))
+
         results = cursor.fetchall()
+
     jobs = []
     for row in results:
         jobs.append({
@@ -291,7 +308,9 @@ def search():
             "status": row[6],
             "notes": row[7]
         })
+
     return jsonify({"success": True, "results": jobs})
+
 
 @app.route("/advanced_filter", methods=["POST"])
 @login_required
@@ -334,8 +353,14 @@ def advanced_filter():
             "status": row[6],
             "notes": row[7]
         })
-    
     return jsonify({"success": True, "results": jobs})
+
+
+@app.route("/clear_flash", methods=["POST"])
+def clear_flash():
+    session.pop("flash_message", None)  # Remove flash message from session
+    return "", 204  # Respond with no content
+
 
 if __name__ == "__main__":
     create_tables()

@@ -8,10 +8,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //Element for delete job modal
     const deleteJob = document.getElementById("delete-button");
+    const deletePopup = document.getElementById("deleteJobPopup");
+    const confirmDeleteBtn = document.getElementById("confirmDelete");
+    const cancelDeleteBtn = document.getElementById("cancelDelete");
 
-    //elements for search modal
-    const searchBar = document.querySelector('.search-bar');
-    const searchButton = document.querySelector('.icon-button img[alt="Search"]').parentElement;
+
 
     // Elements for Filter Modal
     const filterModal = document.getElementById("filter_modal");
@@ -29,6 +30,103 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginForm = document.querySelector("form[action*='login']");
     const signupForm = document.querySelector("form[action*='register_users']");
     
+    // Delete account
+    const deleteAccountBtn = document.querySelector(".delete-account-btn");
+    const deleteAccountPopup = document.getElementById("deleteAccountPopup");
+    const confirmDeleteAccountBtn = document.getElementById("confirmDeleteAccount");
+    const cancelDeleteAccountBtn = document.getElementById("cancelDeleteAccount");
+
+    //Search element
+    const searchBar = document.querySelector(".search-bar");
+    const searchButton = document.querySelector(".search-btn");
+
+
+    const cancelSearchButton = document.createElement("button");
+    cancelSearchButton.innerHTML = "&times;"; // Use "×" symbol
+    cancelSearchButton.classList.add("cancel-search-btn");
+    cancelSearchButton.style.display = "none"; // Hide by default
+
+    // Style to remove background and border
+    cancelSearchButton.style.background = "none";
+    cancelSearchButton.style.border = "none";
+    cancelSearchButton.style.fontSize = "24px";
+    cancelSearchButton.style.cursor = "pointer";
+    cancelSearchButton.style.marginLeft = "10px"; // Add spacing
+    cancelSearchButton.style.color = "#555"; // Optional: Adjust color for visibility
+
+    searchBar.insertAdjacentElement("afterend", cancelSearchButton);
+
+    function performSearch() {
+        const query = searchBar.value.trim();
+
+        if (!query) {
+            alert("Please enter a search term.");
+            return;
+        }
+
+        fetch("/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: query }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            tableContent.innerHTML = ""; // Clear existing table content
+
+            if (data.success) {
+                if (data.results.length > 0) {
+                    data.results.forEach(job => {
+                        const newRow = document.createElement("div");
+                        newRow.classList.add("table-row");
+                        newRow.dataset.id = job.id;
+                        newRow.innerHTML = `
+                            <input type="checkbox" class="checkbox">
+                            <span>${job.company_name}</span>
+                            <span>${job.title} <a href="${job.link}" target="_blank">🔗</a></span>
+                            <span>${job.status}</span>
+                            <span>${job.date_applied}</span>
+                            <span>${job.notes}</span>
+                        `;
+                        tableContent.appendChild(newRow);
+                    });
+                } else {
+                    const noResultRow = document.createElement("div");
+                    noResultRow.classList.add("table-row");
+                    noResultRow.innerHTML = `<span colspan="5">No results found.</span>`;
+                    tableContent.appendChild(noResultRow);
+                }
+            } else {
+                alert("Error: " + data.message);
+            }
+
+            cancelSearchButton.style.display = "inline-block"; // Show the cancel button
+        })
+        .catch(error => console.error("Search Error:", error));
+    }
+
+    function cancelSearch() {
+        searchBar.value = ""; // Clear search input
+        window.location.reload(); // Reload the page to show all job applications
+    }
+
+    // Attach event listeners to trigger search
+    if (searchButton) {
+        searchButton.addEventListener("click", performSearch);
+    }
+    
+    if (searchBar) {
+        searchBar.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                performSearch();
+            }
+        });
+    }
+
+    // Attach event listener to cancel search button
+    cancelSearchButton.addEventListener("click", cancelSearch);
+
+
     profileButton.addEventListener("click", (event) => {
         event.stopPropagation();
         profileSection.classList.toggle("show");
@@ -104,6 +202,36 @@ document.addEventListener("DOMContentLoaded", () => {
         form.querySelectorAll(".error-message").forEach(error => error.remove());
     }
 
+
+    if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+            deleteAccountPopup.style.display = "flex"; // Show the confirmation popup
+        });
+    }
+
+    // Handle Confirm Delete Account
+    confirmDeleteAccountBtn.addEventListener("click", () => {
+        fetch("/delete_account", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Your account has been deleted. You will be redirected.");
+                window.location.href = data.redirect; // Redirect to sign-up page
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+
+    // Handle Cancel Delete Account
+    cancelDeleteAccountBtn.addEventListener("click", () => {
+        deleteAccountPopup.style.display = "none"; // Close popup
+    });
 
     tableContent.addEventListener("change", (event) => {
         if(event.target.classList.contains("status-dropdown")) {
@@ -275,26 +403,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    let selectedJobIds = []; // Store job IDs to delete
+
     deleteJob.addEventListener("click", () => {
         const checkedRows = document.querySelectorAll(".checkbox:checked");
         if (checkedRows.length === 0) return;
 
-        if (!confirm("Are you sure you want to delete the selected jobs?")) return;
+        selectedJobIds = [...checkedRows].map(cb => cb.closest(".table-row").dataset.id);
 
-        const jobIds = [...checkedRows].map(cb => cb.closest(".table-row").dataset.id);
+        if (selectedJobIds.length > 0) {
+            deletePopup.style.display = "flex"; // Show popup
+        }
+    });
 
-        // Send request to Flask backend to delete jobs
+    // Handle Confirm Delete
+    confirmDeleteBtn.addEventListener("click", () => {
+        if (selectedJobIds.length === 0) return;
+
         fetch("/delete-job", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ job_ids: jobIds }) // Send array of IDs
+            body: JSON.stringify({ job_ids: selectedJobIds }) // Send array of IDs
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Remove deleted rows from UI
-                checkedRows.forEach(cb => cb.closest(".table-row").remove());
-                deleteJob.classList.remove("show"); // Hide button after delete
+                selectedJobIds.forEach(jobId => {
+                    const row = document.querySelector(`.table-row[data-id='${jobId}']`);
+                    if (row) row.remove();
+                });
+
+                deleteJob.classList.remove("show"); // Hide delete button
+                deletePopup.style.display = "none"; // Close popup
             } else {
                 alert("Error: " + data.message);
             }
@@ -302,52 +442,12 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(error => console.error("Error:", error));
     });
 
-    //Search function
-    if(searchButton && searchBar){
-        searchButton.addEventListener('click', ()=>{
-            const query = searchBar.value.trim();
-            fetch('/search', {
-                method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({query: query})
-            })
-            .then(response => response.json())
-            .then(data => {
-                tableContent.innerHTML ='';
-                if(data.success){
-                    if (data.results.length > 0){
-                        data.results.forEach(job => {
-                            const newRow = document.createElement('div');
-                            newRow.classList.add('table-row');
-                            newRow.dataset.id = job.id;
-                            newRow.innerHTML = `
-                                <input type="checkbox" class="checkbox">
-                                <span>${jobData.company}</span>
-                                <span>${jobData.title} <a href="${jobData.link}" target="_blank">[-]</a></span>
-                                <select class="status-dropdown" data-previous-value="${jobData.status}">
-                                    <option value="Applied" ${jobData.status === 'Applied' ? 'selected="selected"' : ''}>Applied</option>
-                                    <option value="Interview" ${jobData.status === 'Interview' ? 'selected' : ''}>Interview</option>
-                                    <option value="Offer" ${jobData.status === 'Offer' ? 'selected' : ''}>Offer</option>
-                                    <option value="Rejected" ${jobData.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
-                                </select>
-                                <span>${jobData.date_applied}</span>
-                                <span>${jobData.notes}</span>
-                            `;
-                            tableContent.appendChild(newRow);
-                        });
-                    } else {
-                        const noResultRow = document.createElement('div');
-                        noResultRow.classList.add('table-row');
-                        noResultRow.innerHTML = `<span colspan="5"> No result found</span>`;
-                        tableContent.appendChild(noResultRow);
-                    }
-                }else{
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => console.error("Error:", error))
-        });
-    }
+    // Handle Cancel Delete
+    cancelDeleteBtn.addEventListener("click", () => {
+        deletePopup.style.display = "none"; // Close popup
+        selectedJobIds = []; // Clear selection
+    });
+
 
     applyFilterBtn.addEventListener("click", (event) => {
         event.preventDefault();

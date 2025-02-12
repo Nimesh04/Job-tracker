@@ -258,6 +258,116 @@ a:hover{
     width: 90%;
 }
 
+.delete-job-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1000;
+}
+
+.delete-job-container span {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.job-delete-btn {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.confirm-delete, .cancel-delete {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.confirm-delete {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.confirm-delete:hover {
+    background-color: #cc0000;
+}
+
+.cancel-delete {
+    background-color: #ddd;
+    color: black;
+}
+
+.cancel-delete:hover {
+    background-color: #bbb;
+}
+
+
+.delete-account-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1000;
+}
+
+.delete-account-container span {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.account-delete-btn {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.confirm-delete-account, .cancel-delete-account {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.confirm-delete-account {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.confirm-delete-account:hover {
+    background-color: #cc0000;
+}
+
+.cancel-delete-account {
+    background-color: #ddd;
+    color: black;
+}
+
+.cancel-delete-account:hover {
+    background-color: #bbb;
+}
+
+
 /* MODAL BACKGROUND */
 .modal {
     display: none; 
@@ -279,7 +389,7 @@ a:hover{
     background-color: white;
     width: 90%;  /* Ensure responsiveness */
     max-width: 450px;  /* Limit max size */
-    height: 90vh;  /* Make sure it fits inside the viewport */
+    /* height: 90vh;  Make sure it fits inside the viewport */
     max-height: 500px;  /* Ensure it does not grow beyond screen height */
     padding: 15px;
     border-radius: 12px;

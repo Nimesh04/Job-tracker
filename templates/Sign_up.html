@@ -16,6 +16,18 @@
             <img class="logo" src="{{ url_for('static', filename='Images/J-removebg.png') }}">
             <h1 class="main-title"> WELCOME <br> TO <br><i>JOB</i> TRACKER</h1>
         </div>
+
+        <div class="flash-container">
+            <ul class="flash-messages">
+                {% if flash_message %}
+                    <li class="{{ flash_message['category'] }}">
+                        {{ flash_message['message'] }}
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        
         <div class="sign-up-form">
             <h2 class="signup-title">SIGN UP</h2>
             <form method="POST" action="{{ url_for('register_users') }}">
@@ -53,21 +65,19 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-                const flashData = JSON.parse('{{ session.pop("flash_message", "{}") | tojson | safe }}');
-        
-                if (flashData.message) {
-                    const flashDiv = document.createElement("div");
-                    flashDiv.classList.add("flash-message", flashData.category);
-                    flashDiv.innerText = flashData.message;
-                    document.body.appendChild(flashDiv);
-        
-                    // Auto-hide after 3 seconds
+                let flashMessage = document.querySelector(".flash-messages li");
+                if (flashMessage) {
                     setTimeout(() => {
-                        flashDiv.style.opacity = "0";
-                        setTimeout(() => flashDiv.remove(), 500);
+                        flashMessage.style.opacity = "0";
+                        setTimeout(() => flashMessage.remove(), 500);
                     }, 3000);
+        
+                    // Make an AJAX request to clear session flash message immediately
+                    fetch("/clear_flash", { method: "POST" });
                 }
             });
         </script>
+        
+        
     </body>
 </html>
