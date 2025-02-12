@@ -10,6 +10,10 @@ from flask_login import (
     logout_user,
     login_required
 )
+import psycopg2
+DATABASE_URL = os.environ.get("DATABASE_URL")
+connection = psycopg2.connect(DATABASE_URL)
+
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
