@@ -74,18 +74,20 @@ form label{
 /* Container for first and last name fields */
 .name-fields {
     display: flex;
-    flex-wrap: wrap;      /* Allows the fields to wrap on smaller screens */
+    justify-content: space-between;      /* Allows the fields to wrap on smaller screens */
     gap: 20px;            /* Adds space between the fields */
-    margin-bottom: 15px;  /* Optional: Adds space after the name fields */
+    margin-bottom: 15px; 
+    width: 100%; 
 }
 
 /* Individual name field styling */
 .name-field {
     flex: 1;              /* Each field takes up equal available space */
-    min-width: 200px;     /* Ensures a reasonable minimum width on smaller screens */
+    min-width: 45%;     /* Ensures a reasonable minimum width on smaller screens */
 }
 
 .first-input-field{
+    width: 100%;
     margin-top: 5px;
     padding: 15px;
     border: 1px solid #ccc;
@@ -259,5 +261,17 @@ form label{
 
     .sign-up-form {
         margin-left: 0; /* Removes unnecessary left margin */
+    }
+}
+
+
+@media (max-width: 600px) {
+    .name-fields {
+        flex-direction: column; /* Stack fields on small screens */
+        gap: 10px; /* Reduce gap */
+    }
+
+    .name-field {
+        width: 100%; /* Makes input take full width */
     }
 }
