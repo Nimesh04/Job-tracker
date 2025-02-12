@@ -11,10 +11,12 @@ from flask_login import (
     logout_user,
     login_required
 )
-DATABASE_PATH = "/var/data/job_tracker.db"
+import psycopg2
+
+DATABASE_URL = os.getenv("DATABASE_URL")  # Fetch from Render environment variables
 
 def get_db_connection():
-    return sqlite3.connect(DATABASE_PATH, check_same_thread=False)
+    return psycopg2.connect(DATABASE_URL, sslmode="require")
 
 
 app = Flask(__name__)
@@ -49,22 +51,20 @@ def load_user(user_id):
 
 # Create the tables for the database
 def create_tables():
-    os.makedirs("/var/data", exist_ok=True)  # Ensure /var/data exists
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
+    with get_db_connection() as connection:
+        cursor = connection.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 username TEXT NOT NULL UNIQUE,
                 fName TEXT NOT NULL,
                 lName TEXT NOT NULL,
                 email TEXT NOT NULL,
-                password TEXT NOT NULL
-            )
+                password TEXT NOT NULL)
         ''')
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS job_applications (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 title TEXT NOT NULL,
                 company_name TEXT NOT NULL,
@@ -72,10 +72,10 @@ def create_tables():
                 date_applied TEXT NOT NULL,
                 status TEXT NOT NULL,
                 notes TEXT,
-                FOREIGN KEY (user_id) REFERENCES users (id)
-            )
+                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE)
         ''')
-        conn.commit()
+        connection.commit()
+
 
 
 @app.route("/")
@@ -372,4 +372,4 @@ def clear_flash():
 
 if __name__ == "__main__":
     create_tables()
-    app.run(debug=True)
+    app.run()
