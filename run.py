@@ -1,7 +1,7 @@
 import sqlite3
 import bcrypt
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -104,11 +104,11 @@ def register_users():
     confirm_password = request.form["confirm_password"]
 
     if not username or not email or not password:
-        flash("All fields are required!", "error")
+        session["flash_message"]= {"message":"All fields are required!", "category": "error"}
         return redirect(url_for("sign_up"))
     
     if password != confirm_password:
-        flash("Passwords do not match", "error")
+        session["flash_message"]= {"message":"Passwords do not match", "category": "error"}
         return redirect(url_for("sign_up"))
     
     with sqlite3.connect('job_tracker.db') as connection:
@@ -118,16 +118,16 @@ def register_users():
         try:
             cursor.execute('SELECT id FROM users WHERE username = ? OR email = ?', (username, email))
             if cursor.fetchone():
-                flash("Username or email already exists", "error")
+                session["flash_message"]= {"message":"Username or email already exists", "category":"error"}
                 return redirect(url_for("sign_up"))
             
             cursor.execute("INSERT INTO users (fName, lName, username, email, password) VALUES (?,?,?,?,?)",
                            (fName, lName, username, email, hashed_password))
             connection.commit()
-            flash("Registration successful! Please log in.", "success")
+            session["flash_message"] = {"message":"Registration successful! Please log in.", "category": "success"}
             return redirect(url_for("login_page"))
         except sqlite3.IntegrityError as e:
-            flash("Database constraint error: " + str(e), "error")
+            session["flash_message"]= {"message": "Database constraint error: " + str(e) , "category": "error"} 
             return redirect(url_for("sign_up"))
 
 # Login endpoint using Flask-Login's login_user
@@ -141,8 +141,7 @@ def login():
         cursor.execute("SELECT id, password, username, email FROM users WHERE username = ?", (username,))
         result = cursor.fetchone()
         if not result:
-            flash("Invalid username or password.", "error")
-            return redirect(url_for("login_page"))
+            session["flash_message"] = {"message": "Invalid username or password.", "category": "error"}
         user_id, stored_password, user_name, user_email = result
         if bcrypt.checkpw(password.encode("utf-8"), stored_password.encode("utf-8")):
             # Retrieve all user details
@@ -150,10 +149,10 @@ def login():
             user_data = cursor.fetchone()
             user = User(*user_data)
             login_user(user)
-            flash("Login successful!", "success")
+            session["flash_message"] = {"message": "Login successful!", "category": "success"}
             return redirect(url_for("dashboard"))
         else:
-            flash("Invalid username or password.", "error")
+            session["flash_message"] = {"message": "Invalid Username or Password", "category": "success"}
             return redirect(url_for("login_page"))
 
 # Logout endpoint
@@ -161,7 +160,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("You have been logged out.", "success")
+    session["flash_message"] = {"message": "You've been successfuly log out.", "category": "success"}
     return redirect(url_for('login_page'))
 
 # Add a job application (requires login)

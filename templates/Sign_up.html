@@ -16,29 +16,17 @@
             <img class="logo" src="{{ url_for('static', filename='Images/J-removebg.png') }}">
             <h1 class="main-title"> WELCOME <br> TO <br><i>JOB</i> TRACKER</h1>
         </div>
-        <div class="flash-container">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <ul class="flash-messages">
-                        {% for category, message in messages %}
-                            <li class="{{ category }}">{{ message }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-            {% endwith %}
-        </div>
-        
         <div class="sign-up-form">
             <h2 class="signup-title">SIGN UP</h2>
             <form method="POST" action="{{ url_for('register_users') }}">
                 <div class="name-fields">
                     <div class="name-field">
                         <label for="fName">First Name</label>
-                        <input type="text" id="fName" class="input-field" name="fName" required>
+                        <input type="text" id="fName" class="first-input-field" name="fName" required>
                     </div>
                     <div class="name-field">
                         <label for="lName">Last Name</label>
-                        <input type="text" id="lName" class="input-field" name="lName" required>
+                        <input type="text" id="lName" class="first-input-field" name="lName" required>
                     </div>
                 </div>
             
@@ -62,5 +50,24 @@
                 <button type="submit" class="login-btn"> LOGIN</button>
             </form>
         </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const flashData = JSON.parse('{{ session.pop("flash_message", "{}") | tojson | safe }}');
+        
+                if (flashData.message) {
+                    const flashDiv = document.createElement("div");
+                    flashDiv.classList.add("flash-message", flashData.category);
+                    flashDiv.innerText = flashData.message;
+                    document.body.appendChild(flashDiv);
+        
+                    // Auto-hide after 3 seconds
+                    setTimeout(() => {
+                        flashDiv.style.opacity = "0";
+                        setTimeout(() => flashDiv.remove(), 500);
+                    }, 3000);
+                }
+            });
+        </script>
     </body>
 </html>
