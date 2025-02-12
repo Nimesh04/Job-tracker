@@ -1,3 +1,4 @@
+import os
 import sqlite3
 import bcrypt
 from datetime import datetime
