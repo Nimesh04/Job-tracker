@@ -2,3 +2,4 @@ Flask
 Flask-Login
 gunicorn
 bcrypt
+psycopg2-binary
