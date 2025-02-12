@@ -85,7 +85,7 @@ def home():
 @app.route("/sign_up")
 def sign_up():
     flash_message = session.pop("flash_message", None)
-    return render_template("sign_up.html", flash_message=flash_message)
+    return render_template("Sign_up.html", flash_message=flash_message)
 
 
 @app.route("/login_page")
