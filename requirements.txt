@@ -2,4 +2,3 @@ Flask
 Flask-Login
 gunicorn
 bcrypt
-sqlite3
