@@ -96,7 +96,7 @@
                 <div class="modal-content">
                     <span class="close" id="filter_close">&times;</span>
                     <h2>Filter</h2>
-                    <form id="filterForm">
+                    <form id="filterForm" action="/add_job" method="POST">
                         <fieldset id="columns-to-display">
                             <legend>Columns to Display</legend>
                             <label style="display:block;"><input type="checkbox" name="columns" value="company_name" checked> Company Name</label>
@@ -128,7 +128,7 @@
             </div>
         </div>
 
-        <div class="delete-job-container" id="deleteJobPopup" style="display: none;">
+        <div class="delete-job-container" id="deleteJobPop  " style="display: none;">
             <span>Do you want to delete this job?</span>
             <div class="job-delete-btn">
                 <button type="submit" class="confirm-delete" id="confirmDelete">Confirm</button>
