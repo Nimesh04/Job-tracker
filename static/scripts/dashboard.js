@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmDeleteBtn = document.getElementById("confirmDelete");
     const cancelDeleteBtn = document.getElementById("cancelDelete");
 
-
+    console.log("DeletePopup is" + deletePopup);
 
     // Elements for Filter Modal
     const filterModal = document.getElementById("filter_modal");
