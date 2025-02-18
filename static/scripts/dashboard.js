@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     //Element for delete job modal
     const deleteJob = document.getElementById("delete-button");
-    const deletePopup = document.getElementById("deleteJobPopup");
+    const deletePopup = document.getElementById("deleteJobPopUp");
     const confirmDeleteBtn = document.getElementById("confirmDelete");
     const cancelDeleteBtn = document.getElementById("cancelDelete");
 
